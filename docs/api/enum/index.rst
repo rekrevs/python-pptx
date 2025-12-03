@@ -29,6 +29,7 @@ can be found here:
    XlAxisCrosses
    XlCategoryType
    XlChartType
+   XlChartExType
    XlDataLabelPosition
    XlLegendPosition
    XlMarkerStyle

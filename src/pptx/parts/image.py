@@ -150,6 +150,9 @@ class Image(object):
     @classmethod
     def from_blob(cls, blob: bytes, filename: str | None = None) -> Image:
         """Return a new |Image| object loaded from the image binary in `blob`."""
+        # Use SvgImage for SVG content
+        if _is_svg(blob):
+            return SvgImage(blob, filename)
         return cls(blob, filename)
 
     @classmethod
@@ -273,3 +276,105 @@ class Image(object):
         )
         stream.close()
         return (format, (width_px, height_px), dpi)
+
+
+def _is_svg(blob: bytes) -> bool:
+    """Return True if `blob` contains SVG image data."""
+    # Check for XML declaration or SVG tag at start of file
+    # SVG files typically start with <?xml or <svg or have <svg somewhere early
+    header = blob[:1024].lstrip()
+    # Check for common SVG signatures
+    if header.startswith(b"<?xml"):
+        return b"<svg" in header or b"<SVG" in header
+    return header.startswith(b"<svg") or header.startswith(b"<SVG")
+
+
+class SvgImage(Image):
+    """An SVG image that doesn't require PIL for properties.
+
+    SVG is a vector format not supported by PIL, so this class provides
+    SVG-specific implementations of the required image properties.
+    """
+
+    @lazyproperty
+    def content_type(self) -> str:
+        """MIME-type of this image: `"image/svg+xml"`."""
+        return "image/svg+xml"
+
+    @lazyproperty
+    def dpi(self) -> tuple[int, int]:
+        """DPI for SVG images.
+
+        SVG is resolution-independent, so we return a nominal 96 DPI
+        (the CSS/web standard for converting between px and physical units).
+        """
+        return (96, 96)
+
+    @lazyproperty
+    def ext(self) -> str:
+        """File extension for SVG: `'svg'`."""
+        return "svg"
+
+    @lazyproperty
+    def size(self) -> tuple[int, int]:
+        """Dimensions of this SVG image in pixels.
+
+        Parses the width/height attributes from the SVG root element.
+        Falls back to viewBox if width/height not specified.
+        Returns (300, 150) as default (SVG spec default).
+        """
+        import re
+
+        try:
+            svg_text = self._blob.decode("utf-8", errors="ignore")
+        except Exception:
+            return (300, 150)
+
+        # Find the <svg ...> opening tag
+        svg_match = re.search(r"<svg\s[^>]*>", svg_text, re.IGNORECASE | re.DOTALL)
+        if not svg_match:
+            return (300, 150)
+
+        svg_tag = svg_match.group(0)
+
+        def parse_dimension(value: str) -> int:
+            """Parse a dimension value, handling units."""
+            value = value.strip()
+            # Remove common units and convert to pixels (assuming 96 DPI)
+            units = {"px": 1, "pt": 96 / 72, "in": 96, "cm": 96 / 2.54, "mm": 96 / 25.4}
+            for unit, factor in units.items():
+                if value.endswith(unit):
+                    return int(float(value[: -len(unit)].strip()) * factor)
+            # No unit or unknown unit - treat as pixels
+            try:
+                return int(float(value))
+            except ValueError:
+                return 0
+
+        # Try to get width and height attributes
+        width_match = re.search(r'\bwidth\s*=\s*["\']([^"\']+)["\']', svg_tag, re.IGNORECASE)
+        height_match = re.search(r'\bheight\s*=\s*["\']([^"\']+)["\']', svg_tag, re.IGNORECASE)
+
+        if width_match and height_match:
+            width = parse_dimension(width_match.group(1))
+            height = parse_dimension(height_match.group(1))
+            if width > 0 and height > 0:
+                return (width, height)
+
+        # Fall back to viewBox
+        viewbox_match = re.search(
+            r'\bviewBox\s*=\s*["\']([^"\']+)["\']', svg_tag, re.IGNORECASE
+        )
+        if viewbox_match:
+            parts = viewbox_match.group(1).split()
+            if len(parts) >= 4:
+                try:
+                    width = int(float(parts[2]))
+                    height = int(float(parts[3]))
+                    if width > 0 and height > 0:
+                        return (width, height)
+                except ValueError:
+                    pass
+
+        # Default SVG size per spec
+        return (300, 150)

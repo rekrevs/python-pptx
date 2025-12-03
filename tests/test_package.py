@@ -191,17 +191,17 @@ class Describe_ImageParts(object):
         image_part = image_parts._find_by_sha1(sha1)
         assert image_part is expected_value
 
-    def but_it_skips_unsupported_image_types(self, request, _iter_):
+    def it_can_find_svg_image_parts(self, request, _iter_):
         sha1 = "f00beed"
-        svg_part_ = instance_mock(request, Part, name="svg_part_")
-        png_part_ = instance_mock(request, ImagePart, name="png_part_", sha1=sha1)
-        # ---order iteration to encounter svg part before target part---
+        svg_part_ = instance_mock(request, ImagePart, name="svg_part_", sha1=sha1)
+        png_part_ = instance_mock(request, ImagePart, name="png_part_", sha1="other")
+        # ---SVG parts are now supported and can be found by sha1---
         _iter_.return_value = iter((svg_part_, png_part_))
         image_parts = _ImageParts(None)
 
         result = image_parts._find_by_sha1(sha1)
 
-        assert result == png_part_
+        assert result == svg_part_
 
     # fixtures ---------------------------------------------
 

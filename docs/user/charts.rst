@@ -257,6 +257,81 @@ doesn't have any axes::
 .. image:: /_static/img/chart-07.png
 
 
+Modern Charts (Office 2016+)
+----------------------------
+
+PowerPoint 2016 introduced several new chart types that use a different
+underlying format called ChartEx. |pp| supports creating these modern charts
+using the ``ChartExData`` class and ``XL_CHARTEX_TYPE`` enumeration::
+
+    from pptx import Presentation
+    from pptx.chartex.data import ChartExData
+    from pptx.enum.chart import XL_CHARTEX_TYPE
+    from pptx.util import Inches
+
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[5])
+
+    # Create a Treemap chart
+    chart_data = ChartExData()
+    chart_data.add_series("Sales", ["Q1", "Q2", "Q3", "Q4"], [100, 150, 120, 180])
+
+    x, y, cx, cy = Inches(1), Inches(1), Inches(8), Inches(5)
+    slide.shapes.add_chartex(
+        XL_CHARTEX_TYPE.TREEMAP, x, y, cx, cy, chart_data
+    )
+
+    prs.save('treemap-chart.pptx')
+
+The following modern chart types are supported:
+
+**Treemap** (``XL_CHARTEX_TYPE.TREEMAP``)
+    Displays hierarchical data as nested rectangles. Each category is
+    represented by a rectangle, sized proportionally to its value.
+
+**Sunburst** (``XL_CHARTEX_TYPE.SUNBURST``)
+    Similar to treemap but displayed as concentric rings. Great for showing
+    hierarchical relationships.
+
+**Waterfall** (``XL_CHARTEX_TYPE.WATERFALL``)
+    Shows how an initial value is affected by a series of positive or negative
+    values. Perfect for financial analysis::
+
+        chart_data = ChartExData()
+        chart_data.add_series(
+            "Profit",
+            ["Start", "Revenue", "Costs", "Tax", "End"],
+            [100, 50, -30, -10, 110],
+            subtotals=[4]  # Mark "End" as a subtotal
+        )
+
+**Funnel** (``XL_CHARTEX_TYPE.FUNNEL``)
+    Visualizes stages in a process, typically showing decreasing quantities
+    at each stage (e.g., sales pipeline).
+
+**Box & Whisker** (``XL_CHARTEX_TYPE.BOX_WHISKER``)
+    Statistical chart showing distribution through quartiles, median, and
+    outliers.
+
+**Map** (``XL_CHARTEX_TYPE.REGION_MAP``)
+    Geographic visualization with regions colored by value::
+
+        chart_data = ChartExData()
+        chart_data.add_series(
+            "Population (millions)",
+            ["USA", "Germany", "Japan", "Brazil"],
+            [331, 83, 125, 213]
+        )
+
+        slide.shapes.add_chartex(
+            XL_CHARTEX_TYPE.REGION_MAP, x, y, cx, cy, chart_data
+        )
+
+.. note::
+    Modern charts require PowerPoint 2016 or later to display correctly.
+    Older versions of PowerPoint will not be able to render these charts.
+
+
 Odds & Ends
 -----------
 

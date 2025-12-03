@@ -26,11 +26,16 @@ Feature Support
 * Round-trip any Open XML presentation (.pptx file) including all its elements
 * Add slides
 * Populate text placeholders, for example to create a bullet slide
-* Add image to slide at arbitrary position and size
+* Add image to slide at arbitrary position and size, including SVG images
 * Add textbox to a slide; manipulate text font size and bold
 * Add table to a slide
 * Add auto shapes (e.g. polygons, flowchart shapes, etc.) to a slide
-* Add and manipulate column, bar, line, and pie charts
+* Create freeform shapes with lines and Bezier curves
+* Add and manipulate column, bar, line, pie, and other chart types
+* Create modern Office 2016+ charts: Treemap, Sunburst, Waterfall, Funnel, Box & Whisker, and Map
+* Add Morph transitions between slides
+* Read SmartArt diagrams and extract their text content
+* Preserve 3D models, ink annotations, and slide zoom features on round-trip
 * Access and change core document properties such as title and subject
 * And many others ...
 

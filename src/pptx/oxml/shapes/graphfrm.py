@@ -19,6 +19,8 @@ from pptx.oxml.xmlchemy import (
 )
 from pptx.spec import (
     GRAPHIC_DATA_URI_CHART,
+    GRAPHIC_DATA_URI_CHARTEX,
+    GRAPHIC_DATA_URI_DIAGRAM,
     GRAPHIC_DATA_URI_OLEOBJ,
     GRAPHIC_DATA_URI_TABLE,
 )
@@ -102,6 +104,31 @@ class CT_GraphicalObjectData(BaseShapeElement):
         return None if self._oleObj is None else self._oleObj.showAsIcon
 
     @property
+    def diagram_data_rId(self) -> str | None:
+        """Optional `r:dm` attribute value of `dgm:relIds` child element.
+
+        This value is the relationship ID pointing to the diagram data part.
+        Returns `None` when this `a:graphicData` element does not contain a diagram.
+        """
+        relIds = self._diagramRelIds
+        return None if relIds is None else relIds.dm
+
+    @property
+    def _diagramRelIds(self):
+        """Optional `dgm:relIds` element contained in this `a:graphicData` element.
+
+        Returns `None` when this graphic-data element does not enclose a diagram.
+        """
+        from pptx.oxml.diagram import CT_DiagramRelIds
+        from pptx.oxml.ns import qn
+
+        relIds_elements = cast(
+            "list[CT_DiagramRelIds]",
+            self.findall(qn("dgm:relIds")),
+        )
+        return relIds_elements[0] if relIds_elements else None
+
+    @property
     def _oleObj(self) -> CT_OleObject | None:
         """Optional `p:oleObj` element contained in this `p:graphicData' element.
 
@@ -146,6 +173,14 @@ class CT_GraphicalObjectFrame(BaseShapeElement):
             return None
         return chart.rId
 
+    @property
+    def diagram_data_rId(self) -> str | None:
+        """The `r:dm` attribute of the `dgm:relIds` great-grandchild element.
+
+        |None| if not present (i.e., this is not a SmartArt graphic frame).
+        """
+        return self.graphicData.diagram_data_rId
+
     def get_or_add_xfrm(self) -> CT_Transform2D:
         """Return the required `p:xfrm` child element.
 
@@ -186,6 +221,23 @@ class CT_GraphicalObjectFrame(BaseShapeElement):
         graphicData = graphicFrame.graphic.graphicData
         graphicData.uri = GRAPHIC_DATA_URI_CHART
         graphicData.append(CT_Chart.new_chart(rId))
+        return graphicFrame
+
+    @classmethod
+    def new_chartex_graphicFrame(
+        cls, id_: int, name: str, rId: str, x: int, y: int, cx: int, cy: int
+    ) -> CT_GraphicalObjectFrame:
+        """Return a `p:graphicFrame` element tree populated with a ChartEx reference.
+
+        ChartEx charts are Office 2016+ modern chart types (Treemap, Sunburst,
+        Waterfall, Funnel, Box & Whisker).
+        """
+        from pptx.oxml.chartex.chartex import CT_ChartExChart
+
+        graphicFrame = CT_GraphicalObjectFrame.new_graphicFrame(id_, name, x, y, cx, cy)
+        graphicData = graphicFrame.graphic.graphicData
+        graphicData.uri = GRAPHIC_DATA_URI_CHARTEX
+        graphicData.append(CT_ChartExChart.new_chart(rId))
         return graphicFrame
 
     @classmethod

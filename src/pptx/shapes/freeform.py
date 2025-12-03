@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from pptx.oxml.shapes.autoshape import (
         CT_Path2D,
         CT_Path2DClose,
+        CT_Path2DCubicBezierTo,
         CT_Path2DLineTo,
         CT_Path2DMoveTo,
         CT_Shape,
@@ -19,8 +20,10 @@ if TYPE_CHECKING:
     from pptx.shapes.shapetree import _BaseGroupShapes  # pyright: ignore[reportPrivateUsage]
     from pptx.util import Length
 
-CT_DrawingOperation: TypeAlias = "CT_Path2DClose | CT_Path2DLineTo | CT_Path2DMoveTo"
-DrawingOperation: TypeAlias = "_LineSegment | _MoveTo | _Close"
+CT_DrawingOperation: TypeAlias = (
+    "CT_Path2DClose | CT_Path2DCubicBezierTo | CT_Path2DLineTo | CT_Path2DMoveTo"
+)
+DrawingOperation: TypeAlias = "_CubicBezier | _LineSegment | _MoveTo | _Close"
 
 
 class FreeformBuilder(Sequence[DrawingOperation]):
@@ -78,6 +81,31 @@ class FreeformBuilder(Sequence[DrawingOperation]):
         """
         return cls(shapes, Emu(int(round(start_x))), Emu(int(round(start_y))), x_scale, y_scale)
 
+    def add_cubic_bezier(
+        self,
+        cp1_x: float,
+        cp1_y: float,
+        cp2_x: float,
+        cp2_y: float,
+        end_x: float,
+        end_y: float,
+    ):
+        """Add a cubic Bezier curve segment to the freeform shape.
+
+        A cubic Bezier curve is drawn from the current pen position to (`end_x`, `end_y`) using
+        (`cp1_x`, `cp1_y`) as the first control point and (`cp2_x`, `cp2_y`) as the second
+        control point.
+
+        All coordinate values are in local coordinates and are rounded to the nearest integer
+        before use.
+
+        Returns this |FreeformBuilder| object so it can be used in chained calls.
+        """
+        self._drawing_operations.append(
+            _CubicBezier.new(self, cp1_x, cp1_y, cp2_x, cp2_y, end_x, end_y)
+        )
+        return self
+
     def add_line_segments(self, vertices: Iterable[tuple[float, float]], close: bool = True):
         """Add a straight line segment to each point in `vertices`.
 
@@ -127,7 +155,10 @@ class FreeformBuilder(Sequence[DrawingOperation]):
         for drawing_operation in self:
             if isinstance(drawing_operation, _Close):
                 continue
-            min_x = min(min_x, drawing_operation.x)
+            if isinstance(drawing_operation, _CubicBezier):
+                min_x = min(min_x, drawing_operation.min_x)
+            else:
+                min_x = min(min_x, drawing_operation.x)
         return Emu(min_x)
 
     @property
@@ -141,7 +172,10 @@ class FreeformBuilder(Sequence[DrawingOperation]):
         for drawing_operation in self:
             if isinstance(drawing_operation, _Close):
                 continue
-            min_y = min(min_y, drawing_operation.y)
+            if isinstance(drawing_operation, _CubicBezier):
+                min_y = min(min_y, drawing_operation.min_y)
+            else:
+                min_y = min(min_y, drawing_operation.y)
         return Emu(min_y)
 
     def _add_close(self):
@@ -175,8 +209,12 @@ class FreeformBuilder(Sequence[DrawingOperation]):
         for drawing_operation in self:
             if isinstance(drawing_operation, _Close):
                 continue
-            min_x = min(min_x, drawing_operation.x)
-            max_x = max(max_x, drawing_operation.x)
+            if isinstance(drawing_operation, _CubicBezier):
+                min_x = min(min_x, drawing_operation.min_x)
+                max_x = max(max_x, drawing_operation.max_x)
+            else:
+                min_x = min(min_x, drawing_operation.x)
+                max_x = max(max_x, drawing_operation.x)
         return Emu(max_x - min_x)
 
     @property
@@ -186,8 +224,12 @@ class FreeformBuilder(Sequence[DrawingOperation]):
         for drawing_operation in self:
             if isinstance(drawing_operation, _Close):
                 continue
-            min_y = min(min_y, drawing_operation.y)
-            max_y = max(max_y, drawing_operation.y)
+            if isinstance(drawing_operation, _CubicBezier):
+                min_y = min(min_y, drawing_operation.min_y)
+                max_y = max(max_y, drawing_operation.max_y)
+            else:
+                min_y = min(min_y, drawing_operation.y)
+                max_y = max(max_y, drawing_operation.y)
         return Emu(max_y - min_y)
 
     @property
@@ -335,3 +377,99 @@ class _MoveTo(_BaseDrawingOperation):
             Emu(self._x - self._freeform_builder.shape_offset_x),
             Emu(self._y - self._freeform_builder.shape_offset_y),
         )
+
+
+class _CubicBezier:
+    """Specifies a cubic Bezier curve segment ending at the specified point.
+
+    A cubic Bezier curve has two control points and an end point.
+    """
+
+    def __init__(
+        self,
+        freeform_builder: FreeformBuilder,
+        cp1_x: Length,
+        cp1_y: Length,
+        cp2_x: Length,
+        cp2_y: Length,
+        end_x: Length,
+        end_y: Length,
+    ):
+        self._freeform_builder = freeform_builder
+        self._cp1_x = cp1_x
+        self._cp1_y = cp1_y
+        self._cp2_x = cp2_x
+        self._cp2_y = cp2_y
+        self._end_x = end_x
+        self._end_y = end_y
+
+    @classmethod
+    def new(
+        cls,
+        freeform_builder: FreeformBuilder,
+        cp1_x: float,
+        cp1_y: float,
+        cp2_x: float,
+        cp2_y: float,
+        end_x: float,
+        end_y: float,
+    ) -> _CubicBezier:
+        """Return a new _CubicBezier object.
+
+        All coordinate values are rounded to the nearest integer before use.
+        """
+        return cls(
+            freeform_builder,
+            Emu(int(round(cp1_x))),
+            Emu(int(round(cp1_y))),
+            Emu(int(round(cp2_x))),
+            Emu(int(round(cp2_y))),
+            Emu(int(round(end_x))),
+            Emu(int(round(end_y))),
+        )
+
+    def apply_operation_to(self, path: CT_Path2D) -> CT_Path2DCubicBezierTo:
+        """Add `a:cubicBezTo` element to `path` for this Bezier curve.
+
+        Returns the `a:cubicBezTo` element newly added to the path.
+        """
+        offset_x = self._freeform_builder.shape_offset_x
+        offset_y = self._freeform_builder.shape_offset_y
+        return path.add_cubicBezTo(
+            Emu(self._cp1_x - offset_x),
+            Emu(self._cp1_y - offset_y),
+            Emu(self._cp2_x - offset_x),
+            Emu(self._cp2_y - offset_y),
+            Emu(self._end_x - offset_x),
+            Emu(self._end_y - offset_y),
+        )
+
+    @property
+    def x(self) -> Length:
+        """Return the horizontal (x) target location of this operation (end point)."""
+        return self._end_x
+
+    @property
+    def y(self) -> Length:
+        """Return the vertical (y) target location of this operation (end point)."""
+        return self._end_y
+
+    @property
+    def min_x(self) -> Length:
+        """Return the minimum x coordinate among all points in this curve."""
+        return Emu(min(self._cp1_x, self._cp2_x, self._end_x))
+
+    @property
+    def max_x(self) -> Length:
+        """Return the maximum x coordinate among all points in this curve."""
+        return Emu(max(self._cp1_x, self._cp2_x, self._end_x))
+
+    @property
+    def min_y(self) -> Length:
+        """Return the minimum y coordinate among all points in this curve."""
+        return Emu(min(self._cp1_y, self._cp2_y, self._end_y))
+
+    @property
+    def max_y(self) -> Length:
+        """Return the maximum y coordinate among all points in this curve."""
+        return Emu(max(self._cp1_y, self._cp2_y, self._end_y))

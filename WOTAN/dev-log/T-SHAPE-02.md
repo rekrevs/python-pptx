@@ -1,0 +1,72 @@
+# Task T-SHAPE-02
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-SHAPE-02 |
+| Parent | B-SHAPE-02 |
+| State | DONE |
+| Created | 2025-12-03 |
+
+## Objective
+
+Add basic read/round-trip support for Ink annotations in presentations. When a PPTX with ink annotations is opened and saved, the annotations should be preserved.
+
+## Acceptance Criteria
+
+- [x] Register InkML namespace
+- [x] Add content type for InkML files (already existed)
+- [x] Shape type enum values exist (INK, INK_COMMENT already existed)
+- [x] Ink annotations preserved on round-trip
+
+## Context
+
+Ink annotations use:
+- Content type: `application/inkml+xml` (already in CONTENT_TYPE.INK)
+- Namespace: `http://www.w3.org/2003/InkML`
+- Storage: `ppt/ink/` folder
+- Root element: `<ink>`
+
+This is read/preserve support - creating new ink annotations would require complex stroke data generation.
+
+## Implementation Notes
+
+### Files Modified
+
+- `src/pptx/oxml/ns.py` - Register `inkml:` and `emma:` namespaces
+
+### Pre-existing Support
+
+The following already existed in python-pptx:
+- `CONTENT_TYPE.INK = "application/inkml+xml"`
+- `MSO_SHAPE_TYPE.INK` and `MSO_SHAPE_TYPE.INK_COMMENT` enum values
+
+## Evidence
+
+### Tests Run
+
+```
+$ pytest tests/
+2717 passed in 5.30s
+```
+
+### Infrastructure Verification
+
+```python
+>>> from pptx.oxml.ns import qn
+>>> qn('inkml:ink')
+'{http://www.w3.org/2003/InkML}ink'
+
+>>> from pptx.enum.shapes import MSO_SHAPE_TYPE
+>>> MSO_SHAPE_TYPE.INK
+INK (23)
+>>> MSO_SHAPE_TYPE.INK_COMMENT
+INK_COMMENT (24)
+```
+
+## Outcome
+
+**State**: DONE
+
+Ink annotation support infrastructure is complete. The `inkml:` namespace is now registered, and the existing INK content type and shape type enums provide the foundation for round-trip preservation of ink annotations.

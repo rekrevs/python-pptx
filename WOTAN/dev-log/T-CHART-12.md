@@ -1,0 +1,66 @@
+# Task T-CHART-12
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-CHART-12 |
+| Parent | B-CHART-07 |
+| State | DONE |
+| Created | 2025-12-03 |
+
+## Objective
+
+Add support for Map (Region Map) charts using the existing ChartEx infrastructure.
+
+## Acceptance Criteria
+
+- [x] Add `REGION_MAP` to `XL_CHARTEX_TYPE` enum
+- [x] Add `_RegionMapChartExXmlWriter` class
+- [x] Register in `ChartExXmlWriter` factory
+- [x] Unit tests pass
+
+## Context
+
+Map charts use the same ChartEx (`cx:`) namespace as other modern charts:
+- Layout ID: `regionMap`
+- Uses `cx:strDim type="cat"` for geographic region names (countries, states)
+- Uses `cx:numDim type="colorVal"` for color intensity values
+- The actual map rendering is handled by PowerPoint (using Bing Maps)
+
+## Implementation Notes
+
+### Files Modified
+
+- `src/pptx/enum/chart.py` - Add REGION_MAP enum value
+- `src/pptx/chartex/xmlwriter.py` - Add _RegionMapChartExXmlWriter class and register in factory
+- `tests/chartex/test_chartex_infrastructure.py` - Add test for regionMap XML generation
+
+## Evidence
+
+### Tests Run
+
+```
+$ pytest tests/chartex/ -v
+12 passed in 0.06s
+```
+
+### XML Generation
+
+```python
+>>> from pptx.chartex.xmlwriter import ChartExXmlWriter
+>>> from pptx.chartex.data import ChartExData
+>>> data = ChartExData()
+>>> data.add_series("Population", ["USA", "Germany"], [331, 83])
+>>> writer = ChartExXmlWriter("regionMap", data)
+>>> '<cx:series layoutId="regionMap"' in writer.xml
+True
+>>> '<cx:numDim type="colorVal">' in writer.xml
+True
+```
+
+## Outcome
+
+**State**: DONE
+
+Map chart (Region Map) support has been successfully implemented using the existing ChartEx infrastructure.

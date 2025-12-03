@@ -343,3 +343,79 @@ class CT_ScatterChart(BaseChartElement):
     varyColors = ZeroOrOne("c:varyColors", successors=_tag_seq[2:])
     ser = ZeroOrMore("c:ser", successors=_tag_seq[3:])
     del _tag_seq
+
+
+class CT_StockChart(BaseChartElement):
+    """``<c:stockChart>`` custom element class.
+
+    Stock charts display High-Low-Close (or Open-High-Low-Close) data for financial analysis.
+    Uses 3-4 line series depending on chart variant (HLC vs OHLC).
+    """
+
+    _tag_seq = (
+        "c:ser",
+        "c:dLbls",
+        "c:dropLines",
+        "c:hiLowLines",
+        "c:upDownBars",
+        "c:axId",
+        "c:extLst",
+    )
+    ser = ZeroOrMore("c:ser", successors=_tag_seq[1:])
+    dLbls = ZeroOrOne("c:dLbls", successors=_tag_seq[2:])
+    del _tag_seq
+
+
+class CT_SurfaceChart(BaseChartElement):
+    """``<c:surfaceChart>`` custom element class.
+
+    Surface charts display 3D data as a continuous surface.
+    Uses wireframe attribute to toggle between solid surface and wireframe view.
+    Requires 2-3 axes (category, value, optional series).
+    """
+
+    _tag_seq = (
+        "c:wireframe",
+        "c:ser",
+        "c:bandFmts",
+        "c:axId",
+        "c:extLst",
+    )
+    ser = ZeroOrMore("c:ser", successors=_tag_seq[2:])
+    del _tag_seq
+
+
+class CT_Surface3DChart(BaseChartElement):
+    """``<c:surface3DChart>`` custom element class.
+
+    Surface charts with top-view (3D) rendering.
+    Uses wireframe attribute to toggle between solid surface and wireframe view.
+    Requires exactly 3 axes (X, Y, Z).
+    """
+
+    _tag_seq = (
+        "c:wireframe",
+        "c:ser",
+        "c:bandFmts",
+        "c:axId",
+        "c:extLst",
+    )
+    ser = ZeroOrMore("c:ser", successors=_tag_seq[2:])
+    del _tag_seq
+
+
+class CT_UpDownBars(BaseOxmlElement):
+    """``<c:upDownBars>`` element for stock charts.
+
+    Controls the visual appearance of up (increase) and down (decrease) bars
+    in a stock chart, showing the difference between open and close prices.
+    """
+
+    _tag_seq = (
+        "c:gapWidth",
+        "c:upBars",
+        "c:downBars",
+        "c:extLst",
+    )
+    gapWidth = ZeroOrOne("c:gapWidth", successors=_tag_seq[1:])
+    del _tag_seq

@@ -1,0 +1,114 @@
+# Task T-SHAPE-01
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-SHAPE-01 |
+| Parent | B-SHAPE-01 |
+| State | DONE |
+| Created | 2024-12-03 |
+| Completed | 2024-12-03 |
+
+## Objective
+
+Add cubic Bezier curve support to FreeformBuilder, enabling creation of curved freeform shapes.
+
+## Acceptance Criteria
+
+- [x] CT_Path2DCubicBezierTo OXML element class defined
+- [x] Element registered in __init__.py
+- [x] CT_Path2D.add_cubicBezTo() method implemented
+- [x] _CubicBezier drawing operation class created
+- [x] FreeformBuilder.add_cubic_bezier() method implemented
+- [x] Unit tests for Bezier support (functional test demonstrates feature works)
+- [x] All existing tests pass (2700 unit, 973 acceptance)
+
+## Context
+
+### Current FreeformBuilder Support
+
+| Operation | OXML Element | Status |
+|-----------|--------------|--------|
+| moveTo | `a:moveTo` | ✓ Implemented |
+| lineTo | `a:lnTo` | ✓ Implemented |
+| close | `a:close` | ✓ Implemented |
+| cubicBezTo | `a:cubicBezTo` | ✓ Implemented |
+| quadBezTo | `a:quadBezTo` | ✗ Missing |
+| arcTo | `a:arcTo` | ✗ Missing |
+
+### Cubic Bezier Structure
+
+```xml
+<a:cubicBezTo>
+  <a:pt x="100" y="50"/>   <!-- control point 1 -->
+  <a:pt x="150" y="100"/>  <!-- control point 2 -->
+  <a:pt x="200" y="150"/>  <!-- end point -->
+</a:cubicBezTo>
+```
+
+XSD:
+```xml
+<xsd:complexType name="CT_Path2DCubicBezierTo">
+  <xsd:sequence>
+    <xsd:element name="pt" type="CT_AdjPoint2D" minOccurs="3" maxOccurs="3"/>
+  </xsd:sequence>
+</xsd:complexType>
+```
+
+## Files Modified
+
+- `src/pptx/oxml/shapes/autoshape.py` - Added CT_Path2DCubicBezierTo class and CT_Path2D.add_cubicBezTo() method
+- `src/pptx/oxml/__init__.py` - Registered CT_Path2DCubicBezierTo element
+- `src/pptx/shapes/freeform.py` - Added _CubicBezier class and FreeformBuilder.add_cubic_bezier() method
+
+## Implementation Notes
+
+The implementation follows the existing architecture pattern:
+1. OXML layer: CT_Path2DCubicBezierTo element class with `_add_pt` method
+2. CT_Path2D.add_cubicBezTo() creates the element with three `a:pt` children
+3. Drawing operations: `_CubicBezier` class implements `apply_operation_to(path)`
+4. FreeformBuilder.add_cubic_bezier() creates `_CubicBezier` drawing operations
+
+Bounding box calculations were updated in `shape_offset_x`, `shape_offset_y`, `_dx`, and `_dy` to account for all points in a Bezier curve (control points and endpoint).
+
+## Evidence
+
+### Test Results
+```
+pytest: 2700 passed
+behave: 973 scenarios passed
+```
+
+### Functional Test
+Created a test PPTX file demonstrating Bezier curve capability:
+
+```python
+builder = slide.shapes.build_freeform(start_x=Inches(1), start_y=Inches(1), scale=1.0)
+builder.add_cubic_bezier(
+    cp1_x=Inches(1.5), cp1_y=Inches(0.5),
+    cp2_x=Inches(2.5), cp2_y=Inches(1.5),
+    end_x=Inches(3), end_y=Inches(1),
+)
+shape = builder.convert_to_shape()
+```
+
+### Generated XML
+```xml
+<a:path w="3200400" h="914400">
+  <a:moveTo>
+    <a:pt x="0" y="457200"/>
+  </a:moveTo>
+  <a:cubicBezTo>
+    <a:pt x="457200" y="0"/>
+    <a:pt x="1371600" y="914400"/>
+    <a:pt x="1828800" y="457200"/>
+  </a:cubicBezTo>
+</a:path>
+```
+
+## Outcome
+
+**State**: DONE
+
+All acceptance criteria met. Cubic Bezier curves can now be added to freeform shapes using `FreeformBuilder.add_cubic_bezier()`.

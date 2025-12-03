@@ -97,6 +97,43 @@ another turns out to be pretty hard to get right in the general case, so that
 probably won't come until more of the backlog is burned down.
 
 
+Slide Transitions
+-----------------
+
+You can add transitions between slides, including the Morph transition
+introduced in PowerPoint 2016. The Morph transition creates smooth animations
+between slides by automatically animating objects that appear on both slides::
+
+    from pptx import Presentation
+
+    prs = Presentation()
+    slide1 = prs.slides.add_slide(prs.slide_layouts[5])
+    slide2 = prs.slides.add_slide(prs.slide_layouts[5])
+
+    # Add a Morph transition to slide2
+    slide2.transition.set_morph(option="byObject", duration_ms=1500)
+
+    # Check the transition settings
+    print(slide2.transition.type)         # "morph"
+    print(slide2.transition.morph_option) # "byObject"
+    print(slide2.transition.duration)     # 1500
+
+    prs.save('morph-example.pptx')
+
+The Morph transition has three options:
+
+* ``byObject`` -- Morphs entire objects between slides (default)
+* ``byWord`` -- Morphs text word by word
+* ``byChar`` -- Morphs text character by character
+
+For Morph to work effectively, objects on consecutive slides should have the
+same name. In PowerPoint, you can use the "!!" prefix convention to explicitly
+match objects (e.g., "!!MyShape" on both slides).
+
+.. note::
+    Morph transitions require PowerPoint 2016 or later to display correctly.
+
+
 Up next ...
 -----------
 

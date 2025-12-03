@@ -42,6 +42,12 @@ def ChartXmlWriter(chart_type, chart_data):
             XL_CT.RADAR: _RadarChartXmlWriter,
             XL_CT.RADAR_FILLED: _RadarChartXmlWriter,
             XL_CT.RADAR_MARKERS: _RadarChartXmlWriter,
+            XL_CT.STOCK_HLC: _StockChartXmlWriter,
+            XL_CT.STOCK_OHLC: _StockChartXmlWriter,
+            XL_CT.SURFACE: _SurfaceChartXmlWriter,
+            XL_CT.SURFACE_TOP_VIEW: _SurfaceChartXmlWriter,
+            XL_CT.SURFACE_TOP_VIEW_WIREFRAME: _SurfaceChartXmlWriter,
+            XL_CT.SURFACE_WIREFRAME: _SurfaceChartXmlWriter,
             XL_CT.XY_SCATTER: _XyChartXmlWriter,
             XL_CT.XY_SCATTER_LINES: _XyChartXmlWriter,
             XL_CT.XY_SCATTER_LINES_NO_MARKERS: _XyChartXmlWriter,
@@ -1086,6 +1092,323 @@ class _RadarChartXmlWriter(_BaseChartXmlWriter):
                     "ser_order": series.index,
                     "tx_xml": xml_writer.tx_xml,
                     "marker_xml": self._marker_xml,
+                    "cat_xml": xml_writer.cat_xml,
+                    "val_xml": xml_writer.val_xml,
+                }
+            )
+        return xml
+
+
+class _SurfaceChartXmlWriter(_BaseChartXmlWriter):
+    """
+    Generates XML for ``<c:surfaceChart>`` and ``<c:surface3DChart>`` elements.
+
+    Surface charts display 3D data as a continuous surface. The wireframe
+    attribute toggles between solid surface and wireframe (contour) view.
+    """
+
+    @property
+    def xml(self):
+        return (
+            "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n"
+            '<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawin'
+            'gml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/draw'
+            'ingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/off'
+            'iceDocument/2006/relationships">\n'
+            '  <c:date1904 val="0"/>\n'
+            "  <c:chart>\n"
+            '    <c:autoTitleDeleted val="0"/>\n'
+            "{view3D_xml}"
+            "    <c:plotArea>\n"
+            "      <{chart_element}>\n"
+            "{wireframe_xml}"
+            "{ser_xml}"
+            '        <c:axId val="2118791784"/>\n'
+            '        <c:axId val="2140495176"/>\n'
+            '        <c:axId val="2140495177"/>\n'
+            "      </{chart_element}>\n"
+            "      <c:catAx>\n"
+            '        <c:axId val="2118791784"/>\n'
+            "        <c:scaling>\n"
+            '          <c:orientation val="minMax"/>\n'
+            "        </c:scaling>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="b"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="2140495176"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            '        <c:auto val="1"/>\n'
+            '        <c:lblAlgn val="ctr"/>\n'
+            '        <c:lblOffset val="100"/>\n'
+            '        <c:noMultiLvlLbl val="0"/>\n'
+            "      </c:catAx>\n"
+            "      <c:valAx>\n"
+            '        <c:axId val="2140495176"/>\n'
+            "        <c:scaling/>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="l"/>\n'
+            "        <c:majorGridlines/>\n"
+            '        <c:numFmt formatCode="General" sourceLinked="1"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="2118791784"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            "      </c:valAx>\n"
+            "      <c:serAx>\n"
+            '        <c:axId val="2140495177"/>\n'
+            "        <c:scaling>\n"
+            '          <c:orientation val="minMax"/>\n'
+            "        </c:scaling>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="b"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="2140495176"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            "      </c:serAx>\n"
+            "    </c:plotArea>\n"
+            "    <c:legend>\n"
+            '      <c:legendPos val="r"/>\n'
+            "      <c:layout/>\n"
+            '      <c:overlay val="0"/>\n'
+            "    </c:legend>\n"
+            '    <c:plotVisOnly val="1"/>\n'
+            '    <c:dispBlanksAs val="gap"/>\n'
+            '    <c:showDLblsOverMax val="0"/>\n'
+            "  </c:chart>\n"
+            "  <c:txPr>\n"
+            "    <a:bodyPr/>\n"
+            "    <a:lstStyle/>\n"
+            "    <a:p>\n"
+            "      <a:pPr>\n"
+            '        <a:defRPr sz="1800"/>\n'
+            "      </a:pPr>\n"
+            '      <a:endParaRPr lang="en-US"/>\n'
+            "    </a:p>\n"
+            "  </c:txPr>\n"
+            "</c:chartSpace>\n"
+        ).format(
+            **{
+                "chart_element": self._chart_element,
+                "view3D_xml": self._view3D_xml,
+                "wireframe_xml": self._wireframe_xml,
+                "ser_xml": self._ser_xml,
+            }
+        )
+
+    @property
+    def _chart_element(self):
+        """Return the chart element tag name."""
+        XL = XL_CHART_TYPE
+        if self._chart_type in (XL.SURFACE, XL.SURFACE_WIREFRAME):
+            return "c:surface3DChart"
+        return "c:surfaceChart"
+
+    @property
+    def _view3D_xml(self):
+        """Return view3D XML for 3D surface charts."""
+        XL = XL_CHART_TYPE
+        if self._chart_type in (XL.SURFACE, XL.SURFACE_WIREFRAME):
+            return (
+                "    <c:view3D>\n"
+                '      <c:rotX val="15"/>\n'
+                '      <c:rotY val="20"/>\n'
+                '      <c:depthPercent val="100"/>\n'
+                '      <c:rAngAx val="1"/>\n'
+                "    </c:view3D>\n"
+            )
+        return ""
+
+    @property
+    def _wireframe_xml(self):
+        """Return wireframe XML element for wireframe variants."""
+        XL = XL_CHART_TYPE
+        wireframe_types = (XL.SURFACE_WIREFRAME, XL.SURFACE_TOP_VIEW_WIREFRAME)
+        if self._chart_type in wireframe_types:
+            return '        <c:wireframe val="1"/>\n'
+        return '        <c:wireframe val="0"/>\n'
+
+    @property
+    def _ser_xml(self):
+        xml = ""
+        for series in self._chart_data:
+            xml_writer = _CategorySeriesXmlWriter(series)
+            xml += (
+                "        <c:ser>\n"
+                '          <c:idx val="{ser_idx}"/>\n'
+                '          <c:order val="{ser_order}"/>\n'
+                "{tx_xml}"
+                "{cat_xml}"
+                "{val_xml}"
+                "        </c:ser>\n"
+            ).format(
+                **{
+                    "ser_idx": series.index,
+                    "ser_order": series.index,
+                    "tx_xml": xml_writer.tx_xml,
+                    "cat_xml": xml_writer.cat_xml,
+                    "val_xml": xml_writer.val_xml,
+                }
+            )
+        return xml
+
+
+class _StockChartXmlWriter(_BaseChartXmlWriter):
+    """
+    Generates XML for the ``<c:stockChart>`` element.
+
+    Stock charts display financial data (High-Low-Close or Open-High-Low-Close).
+    They require exactly 3 series (HLC) or 4 series (OHLC) in the correct order.
+    """
+
+    @property
+    def xml(self):
+        return (
+            "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n"
+            '<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawin'
+            'gml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/draw'
+            'ingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/off'
+            'iceDocument/2006/relationships">\n'
+            '  <c:date1904 val="0"/>\n'
+            "  <c:chart>\n"
+            '    <c:autoTitleDeleted val="0"/>\n'
+            "    <c:plotArea>\n"
+            "      <c:stockChart>\n"
+            "{ser_xml}"
+            "        <c:hiLowLines/>\n"
+            "{upDownBars_xml}"
+            '        <c:axId val="2118791784"/>\n'
+            '        <c:axId val="2140495176"/>\n'
+            "      </c:stockChart>\n"
+            "{cat_ax_xml}"
+            "      <c:valAx>\n"
+            '        <c:axId val="2140495176"/>\n'
+            "        <c:scaling/>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="l"/>\n'
+            "        <c:majorGridlines/>\n"
+            '        <c:numFmt formatCode="General" sourceLinked="1"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="2118791784"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            "      </c:valAx>\n"
+            "    </c:plotArea>\n"
+            "    <c:legend>\n"
+            '      <c:legendPos val="r"/>\n'
+            "      <c:layout/>\n"
+            '      <c:overlay val="0"/>\n'
+            "    </c:legend>\n"
+            '    <c:plotVisOnly val="1"/>\n'
+            '    <c:dispBlanksAs val="gap"/>\n'
+            '    <c:showDLblsOverMax val="0"/>\n'
+            "  </c:chart>\n"
+            "  <c:txPr>\n"
+            "    <a:bodyPr/>\n"
+            "    <a:lstStyle/>\n"
+            "    <a:p>\n"
+            "      <a:pPr>\n"
+            '        <a:defRPr sz="1800"/>\n'
+            "      </a:pPr>\n"
+            '      <a:endParaRPr lang="en-US"/>\n'
+            "    </a:p>\n"
+            "  </c:txPr>\n"
+            "</c:chartSpace>\n"
+        ).format(
+            **{
+                "ser_xml": self._ser_xml,
+                "upDownBars_xml": self._upDownBars_xml,
+                "cat_ax_xml": self._cat_ax_xml,
+            }
+        )
+
+    @property
+    def _cat_ax_xml(self):
+        categories = self._chart_data.categories
+
+        if categories.are_dates:
+            return (
+                "      <c:dateAx>\n"
+                '        <c:axId val="2118791784"/>\n'
+                "        <c:scaling>\n"
+                '          <c:orientation val="minMax"/>\n'
+                "        </c:scaling>\n"
+                '        <c:delete val="0"/>\n'
+                '        <c:axPos val="b"/>\n'
+                '        <c:numFmt formatCode="{nf}" sourceLinked="1"/>\n'
+                '        <c:majorTickMark val="out"/>\n'
+                '        <c:minorTickMark val="none"/>\n'
+                '        <c:tickLblPos val="nextTo"/>\n'
+                '        <c:crossAx val="2140495176"/>\n'
+                '        <c:crosses val="autoZero"/>\n'
+                '        <c:auto val="1"/>\n'
+                '        <c:lblOffset val="100"/>\n'
+                '        <c:baseTimeUnit val="days"/>\n'
+                "      </c:dateAx>\n"
+            ).format(**{"nf": categories.number_format})
+
+        return (
+            "      <c:catAx>\n"
+            '        <c:axId val="2118791784"/>\n'
+            "        <c:scaling>\n"
+            '          <c:orientation val="minMax"/>\n'
+            "        </c:scaling>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="b"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="2140495176"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            '        <c:auto val="1"/>\n'
+            '        <c:lblAlgn val="ctr"/>\n'
+            '        <c:lblOffset val="100"/>\n'
+            '        <c:noMultiLvlLbl val="0"/>\n'
+            "      </c:catAx>\n"
+        )
+
+    @property
+    def _upDownBars_xml(self):
+        """Return upDownBars XML for OHLC charts, empty string for HLC."""
+        XL = XL_CHART_TYPE
+        ohlc_types = (XL.STOCK_OHLC, XL.STOCK_VOHLC)
+        if self._chart_type in ohlc_types:
+            return (
+                "        <c:upDownBars>\n"
+                '          <c:gapWidth val="150"/>\n'
+                "          <c:upBars/>\n"
+                "          <c:downBars/>\n"
+                "        </c:upDownBars>\n"
+            )
+        return ""
+
+    @property
+    def _ser_xml(self):
+        xml = ""
+        for series in self._chart_data:
+            xml_writer = _CategorySeriesXmlWriter(series)
+            xml += (
+                "        <c:ser>\n"
+                '          <c:idx val="{ser_idx}"/>\n'
+                '          <c:order val="{ser_order}"/>\n'
+                "{tx_xml}"
+                "          <c:marker>\n"
+                '            <c:symbol val="none"/>\n'
+                "          </c:marker>\n"
+                "{cat_xml}"
+                "{val_xml}"
+                '          <c:smooth val="0"/>\n'
+                "        </c:ser>\n"
+            ).format(
+                **{
+                    "ser_idx": series.index,
+                    "ser_order": series.index,
+                    "tx_xml": xml_writer.tx_xml,
                     "cat_xml": xml_writer.cat_xml,
                     "val_xml": xml_writer.val_xml,
                 }

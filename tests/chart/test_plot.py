@@ -20,6 +20,7 @@ from pptx.chart.plot import (
     PlotFactory,
     PlotTypeInspector,
     RadarPlot,
+    StockPlot,
     XyPlot,
     _BasePlot,
 )
@@ -463,6 +464,9 @@ class DescribePlotTypeInspector(object):
                 "c:radarChart/(c:radarStyle{val=marker},c:ser/c:marker/c:symbol{val" "=none})",
                 XL.RADAR,
             ),
+            # Stock charts - HLC has 3 series, OHLC has 4 series
+            ("c:stockChart/(c:ser,c:ser,c:ser)", XL.STOCK_HLC),
+            ("c:stockChart/(c:ser,c:ser,c:ser,c:ser)", XL.STOCK_OHLC),
         ]
     )
     def chart_type_fixture(self, request):

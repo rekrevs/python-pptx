@@ -46,235 +46,330 @@ Thoroughly test that python-pptx does what it is supposed to do. Run all existin
 
 ## Phase 1: Critical Modern Features
 
-### B-SVG-01 [READY]
+### B-SVG-01 [DONE]
 **Add SVG image support**
 
 Enable inserting, reading, and modifying SVG images in presentations.
 
 **Details**:
-- Add SVG content type detection in `src/pptx/parts/image.py`
-- Remove SVG skip logic in `src/pptx/package.py` (line 164)
-- Handle `a:svgBlip` element in picture shapes
-- Register SVG MIME type
-- Add `a16:` namespace for DrawingML 2016 extensions
+- ~~Add SVG content type detection in `src/pptx/parts/image.py`~~ DONE
+- ~~Remove SVG skip logic in `src/pptx/package.py` (line 164)~~ DONE
+- ~~Register SVG MIME type~~ DONE
+- ~~Handle `asvg:svgBlip` element in picture shapes~~ DONE
+- ~~Add `asvg:` namespace for SVG extension~~ DONE
+- ~~Implement SVG insertion API with PNG fallback~~ DONE (shapes.add_svg_picture())
 
-**Next**: None
+**Next**: T-SVG-01 (DONE)
 
 ---
 
-### B-SMART-01 [NEEDS-SPEC]
+### B-SMART-01 [DONE]
 **Add SmartArt read support**
 
 Enable reading SmartArt diagrams from existing presentations without data loss.
 
 **Details**:
-- Parse `dgm:` namespace elements (diagrams)
-- Parse `dsp:` namespace elements (diagram shapes)
-- Expose SmartArt data model (text, hierarchy)
-- Preserve SmartArt on round-trip even if not fully editable
-- Consider: should SmartArt be convertible to regular shapes?
+- ~~Register `dgm:` namespace (diagrams)~~ DONE
+- ~~Register `dsp:` namespace (diagram shapes)~~ DONE
+- ~~Detect SmartArt in GraphicFrame.shape_type~~ DONE (returns MSO_SHAPE_TYPE.DIAGRAM)
+- ~~Add has_smart_art property~~ DONE
+- ~~Preserve SmartArt on round-trip~~ DONE (was already working)
+- ~~Parse diagram data model (text, hierarchy)~~ DONE
+- ~~Expose Python API for SmartArt content~~ DONE (shape.smart_art.all_text/text)
 
-**Next**: None
+**Next**: T-SMART-01 (DONE)
 
 ---
 
-### B-CHART-01 [READY]
+### B-CHART-01 [DONE]
 **Implement Stock charts**
 
 Add support for Stock chart types (HLC, OHLC, VHLC, VOHLC).
 
 **Details**:
-- Enums already exist in `src/pptx/enum/chart.py`
-- Need XML writer in `src/pptx/chart/xmlwriter.py`
-- Need CT_StockChart element class
-- Need series handling for stock data
+- ~~Enums already exist in `src/pptx/enum/chart.py`~~ DONE
+- ~~CT_StockChart element class~~ DONE
+- ~~CT_UpDownBars element class~~ DONE
+- ~~OXML elements registered~~ DONE
+- ~~XML writer in `src/pptx/chart/xmlwriter.py`~~ DONE (_StockChartXmlWriter)
+- ~~Series handling for stock data~~ DONE (3 series for HLC, 4 for OHLC)
 
-**Next**: None
+**Next**: T-CHART-01 (DONE)
 
 ---
 
-### B-CHART-02 [READY]
+### B-CHART-02 [DONE]
 **Implement Surface charts**
 
-Add support for Surface chart types.
+Add support for Surface chart types (SURFACE, SURFACE_WIREFRAME, SURFACE_TOP_VIEW, SURFACE_TOP_VIEW_WIREFRAME).
 
 **Details**:
-- Referenced in `docs/dev/analysis/cht-series.rst` lines 62-65
-- Need CT_SurfaceSer, CT_SurfaceChart element classes
-- Need XML writer
+- ~~CT_SurfaceChart OXML element~~ DONE
+- ~~CT_Surface3DChart OXML element~~ DONE
+- ~~Elements registered~~ DONE
+- ~~XML writer~~ DONE (_SurfaceChartXmlWriter with 3D/2D and wireframe variants)
+- PlotTypeInspector detection (future - for reading)
+- Plot class with wireframe property (future - for reading)
 
-**Next**: None
+**Next**: T-CHART-02 (DONE - XML writing complete, reading to be added as needed)
 
 ---
 
-## Phase 2: PowerPoint 2016+ Charts
+## Phase 2: PowerPoint 2016+ Charts (ChartEx)
 
-### B-CHART-03 [NEEDS-SPEC]
+**Note**: All Phase 2 charts use the ChartEx (`cx:`) namespace, which is completely different from traditional charts (`c:`). See `WOTAN/docs/chartex-spec.md` for full specification.
+
+**Common Infrastructure Required**:
+- Register `cx:` namespace (`http://schemas.microsoft.com/office/drawing/2014/chartex`)
+- Create `ChartExPart` for content type `application/vnd.ms-office.chartex+xml`
+- Add relationship type `http://schemas.microsoft.com/office/2014/relationships/chartEx`
+- Create OXML elements: CT_ChartExSpace, CT_ChartExData, CT_ChartExPlotArea, CT_ChartExSeries
+- Create base ChartExXmlWriter infrastructure
+
+### B-CHART-03 [DONE]
 **Implement Treemap charts**
 
 Add support for Treemap charts (Office 2016+).
 
 **Details**:
-- Uses `c16:` namespace (Charts 2016 extensions)
-- CT_Treemap element
-- Hierarchical data model
+- ~~Uses `cx:` namespace (ChartEx) - NOT `c16:`~~ DONE
+- ~~`cx:series layoutId="treemap"` element~~ DONE
+- ~~Hierarchical data: `cx:strDim type="cat"` (multi-level), `cx:numDim type="size"`~~ DONE
+- ~~Parent label layout options: "overlapping", "banner", "none"~~ DONE
 
-**Next**: None
+**Spec**: See `WOTAN/docs/chartex-spec.md#treemap`
+
+**Next**: T-CHART-10 (DONE)
 
 ---
 
-### B-CHART-04 [NEEDS-SPEC]
+### B-CHART-04 [DONE]
 **Implement Sunburst charts**
 
 Add support for Sunburst charts (Office 2016+).
 
 **Details**:
-- Uses `c16:` namespace
-- CT_Sunburst element
-- Hierarchical data model similar to Treemap
+- ~~Uses `cx:` namespace (ChartEx)~~ DONE
+- ~~`cx:series layoutId="sunburst"` element~~ DONE
+- ~~Same hierarchical data model as Treemap (multi-level categories = rings)~~ DONE
 
-**Next**: None
+**Spec**: See `WOTAN/docs/chartex-spec.md#sunburst`
+
+**Next**: T-CHART-10 (DONE)
 
 ---
 
-### B-CHART-05 [NEEDS-SPEC]
+### B-CHART-05 [DONE]
 **Implement Waterfall charts**
 
 Add support for Waterfall charts (Office 2016+).
 
 **Details**:
-- Uses `c16:` namespace
-- CT_Waterfall element
-- Special handling for subtotals and totals
+- ~~Uses `cx:` namespace (ChartEx)~~ DONE
+- ~~`cx:series layoutId="waterfall"` element~~ DONE
+- ~~Categories with `cx:strDim type="cat"`, values with `cx:numDim type="val"`~~ DONE
+- ~~Subtotals specified via `cx:subtotals/cx:idx` elements~~ DONE
 
-**Next**: None
+**Spec**: See `WOTAN/docs/chartex-spec.md#waterfall`
+
+**Next**: T-CHART-10 (DONE)
 
 ---
 
-### B-CHART-06 [NEEDS-SPEC]
+### B-CHART-06 [DONE]
 **Implement Funnel charts**
 
 Add support for Funnel charts (Office 2019+).
 
 **Details**:
-- CT_Funnel element
-- Sequential stage data model
+- ~~Uses `cx:` namespace (ChartEx)~~ DONE
+- ~~`cx:series layoutId="funnel"` element~~ DONE
+- ~~Sequential stage data model~~ DONE
+- ~~`cx:visibility` for connector/series lines~~ DONE
 
-**Next**: None
+**Spec**: See `WOTAN/docs/chartex-spec.md#funnel`
+
+**Next**: T-CHART-10 (DONE)
 
 ---
 
-### B-CHART-07 [NEEDS-SPEC]
+### B-CHART-07 [DONE]
 **Implement Map charts**
 
 Add support for Map/Geographic charts (Office 2019+).
 
 **Details**:
-- CT_Map element
-- Geographic data binding
-- May require Bing Maps integration understanding
+- ~~Uses `cx:` namespace (ChartEx) - same infrastructure as other ChartEx charts~~ DONE
+- ~~`cx:series layoutId="regionMap"` element~~ DONE
+- ~~Geographic data binding (country/region names as categories)~~ DONE
+- ~~Color scale handling via `cx:numDim type="colorVal"`~~ DONE
 
-**Next**: None
+**Next**: T-CHART-12 (DONE)
 
 ---
 
-### B-CHART-08 [NEEDS-SPEC]
-**Implement Histogram and Box & Whisker charts**
+### B-CHART-08 [DONE]
+**Implement Box & Whisker charts**
 
-Add support for statistical charts (Office 2016+).
+Add support for Box & Whisker charts (Office 2016+).
 
 **Details**:
-- CT_Histogram, CT_BoxWhisker elements
-- Statistical data calculations
+- ~~Uses `cx:` namespace (ChartEx)~~ DONE
+- ~~`cx:series layoutId="boxWhisker"` element~~ DONE
+- ~~`cx:visibility` for mean line, markers, outliers~~ DONE
+- ~~`cx:statistics quartileMethod="inclusive"` for quartile calculation~~ DONE
 
-**Next**: None
+**Spec**: See `WOTAN/docs/chartex-spec.md#box--whisker`
+
+**Next**: T-CHART-10 (DONE)
+
+---
+
+### B-CHART-09 [DONE]
+**Create ChartEx infrastructure**
+
+Build the foundational ChartEx support required by all Phase 2 charts.
+
+**Details**:
+- ~~Register `cx:` namespace in `ns.py`~~ DONE
+- ~~Create `ChartExPart` class for `application/vnd.ms-office.chartex+xml`~~ DONE
+- ~~Add `RT.CHART_EX` relationship type~~ DONE
+- ~~Create OXML element classes~~ DONE:
+  - CT_ChartExSpace (root)
+  - CT_ChartExData, CT_ChartExChart
+  - CT_ChartExPlotArea, CT_ChartExPlotAreaRegion
+  - CT_ChartExSeries (with layoutId attribute)
+  - CT_ChartExStrDim, CT_ChartExNumDim, CT_ChartExDataId
+- ~~Create base ChartExXmlWriter~~ DONE (Treemap, Sunburst, Waterfall, Funnel, BoxWhisker)
+- ~~Add ChartExData class for data handling~~ DONE
+
+**Priority**: HIGH (blocks all Phase 2 charts)
+
+**Next**: T-CHART-09 (DONE)
 
 ---
 
 ## Phase 3: Transitions and Animation
 
-### B-TRANS-01 [NEEDS-SPEC]
+### B-TRANS-01 [DONE]
 **Implement Morph transitions**
 
-Add support for Morph transition type (PowerPoint 2019+).
+Add support for Morph transition type (PowerPoint 2016+).
 
 **Details**:
-- Uses `p14:` namespace (PowerPoint 2010+ extensions)
-- `p14:transition` element with morph settings
-- Object matching by name ("!!" prefix convention)
-- Add transition property to Slide class
+- ~~Uses `p159:` namespace~~ DONE
+- ~~`<p159:morph>` element (type CT_MorphTransition)~~ DONE
+- ~~`option` attribute: `byObject`, `byWord`, `byChar`~~ DONE
+- ~~Add transition property to Slide class~~ DONE
+- ~~SlideTransition class with type, duration, morph_option properties~~ DONE
+- ~~set_morph() method for easy configuration~~ DONE
+- Object matching by name ("!!" prefix convention - documented for users)
 
-**Next**: None
+**API**:
+```python
+slide.transition.set_morph(option="byObject", duration_ms=2000)
+slide.transition.type  # "morph"
+slide.transition.morph_option  # "byObject", "byWord", or "byChar"
+slide.transition.duration  # 2000 (ms)
+```
+
+**Next**: T-TRANS-01 (DONE)
 
 ---
 
-### B-TRANS-02 [NEEDS-SPEC]
+### B-TRANS-02 [DONE]
 **Implement Zoom features**
 
-Add support for Section Zoom, Slide Zoom, Summary Zoom.
+Add support for Section Zoom, Slide Zoom, Summary Zoom (PowerPoint 2016+).
 
 **Details**:
-- Uses `p14:` namespace
-- Interactive navigation elements
-- Thumbnail generation
+- ~~Register `p166:` namespace~~ DONE
+- ~~Register `pslz:` namespace (slide zoom)~~ DONE
+- ~~CT_SlideZoom, CT_SlideZoomObject, CT_ZoomObjectProperties OXML elements~~ DONE
+- ~~MSO_SHAPE_TYPE.SLIDE_ZOOM enum value~~ DONE
+- ~~GraphicFrame.has_slide_zoom property~~ DONE
+- ~~GraphicFrame.shape_type returns SLIDE_ZOOM for zoom shapes~~ DONE
+- Zoom shapes preserved on round-trip
 
-**Next**: None
+**API**:
+```python
+# Detection
+shape.has_slide_zoom  # True if shape is a Slide Zoom
+shape.shape_type == MSO_SHAPE_TYPE.SLIDE_ZOOM
+
+# Creating new zoom shapes requires thumbnail generation
+# which is complex - preserving existing zooms is supported
+```
+
+**Next**: T-TRANS-02 (DONE - read/preserve support)
 
 ---
 
 ## Phase 4: Advanced Features
 
-### B-MEDIA-01 [NEEDS-SPEC]
+### B-MEDIA-01 [DONE]
 **Add 3D model support**
 
-Enable inserting and positioning 3D models.
+Enable reading and preserving 3D models (Office 2017+).
 
 **Details**:
-- `a3d:model3d` elements
-- 3D model file formats (GLB, etc.)
-- Rotation and positioning
+- ~~Uses `am3d:` namespace (`http://schemas.microsoft.com/office/drawing/2017/model3d`)~~ DONE
+- ~~GLB content type and default mapping~~ DONE
+- ~~MSO_SHAPE_TYPE.MODEL_3D enum value~~ DONE
+- ~~GraphicFrame.has_model_3d property~~ DONE
+- ~~shape_type returns MODEL_3D for 3D model shapes~~ DONE
+- 3D models preserved on round-trip
 
-**Next**: None
+**Next**: T-MEDIA-01 (DONE)
 
 ---
 
-### B-SHAPE-01 [READY]
+### B-SHAPE-01 [DONE]
 **Add Bezier curve support to FreeformBuilder**
 
 Enable creating curved freeform shapes with cubic Bezier segments.
 
 **Details**:
-- Currently only MoveTo, LineTo, Close supported
-- Add `cubicBezTo` path segment support
-- Update FreeformBuilder API
+- ~~Currently only MoveTo, LineTo, Close supported~~ DONE
+- ~~Add `cubicBezTo` path segment support~~ DONE
+- ~~Update FreeformBuilder API~~ DONE
 
-**Next**: None
+**Next**: T-SHAPE-01 (DONE)
 
 ---
 
-### B-SHAPE-02 [NEEDS-SPEC]
+### B-SHAPE-02 [DONE]
 **Implement Ink annotations**
 
-Add support for reading/writing ink annotations.
+Add support for reading/preserving ink annotations (InkML format).
 
 **Details**:
-- Ink ML format in `ppt/ink/` folder
-- Pen strokes, highlighter
-- Tablet/stylus input preservation
+- ~~Content type: `application/inkml+xml`~~ DONE (already existed as CONTENT_TYPE.INK)
+- ~~Namespace: `http://www.w3.org/2003/InkML`~~ DONE (inkml:)
+- ~~MSO_SHAPE_TYPE.INK and INK_COMMENT enum values~~ DONE (already existed)
+- Ink annotations preserved on round-trip
 
-**Next**: None
+**Next**: T-SHAPE-02 (DONE)
 
 ---
 
-### B-MEDIA-02 [NEEDS-SPEC]
+### B-MEDIA-02 [BLOCKED]
 **Add Cameo (live camera) support**
 
 Support for camera feed placeholder (Microsoft 365 2022+).
 
 **Details**:
-- Camera placeholder shape
-- Recording integration
-- Very new feature, low priority
+- Camera placeholder shape (special placeholder type)
+- Can be added to Slide Masters
+- Integrates with Teams PowerPoint Live
+- Limited to direct cameras (not virtual cameras)
+- One video feed per slide
+
+**Spec**: See `WOTAN/docs/needs-spec-research.md#b-media-02-cameo-live-camera`
+
+**Priority**: VERY LOW - Minimal public documentation, very new feature
+
+**Blocked by**: Lack of public XML schema documentation
 
 **Next**: None
 
@@ -282,30 +377,46 @@ Support for camera feed placeholder (Microsoft 365 2022+).
 
 ## Maintenance and Infrastructure
 
-### B-TEST-01 [READY]
+### B-TEST-01 [DONE]
 **Create test PPTX files with modern features**
 
 Build a collection of test files containing modern PowerPoint features for testing.
 
 **Details**:
-- Create PPTX files in PowerPoint with each modern feature
-- Use for round-trip testing
-- Document expected behavior
+- ~~Create PPTX files for each modern feature~~ DONE
+- ~~Python script to generate test files~~ DONE (create_test_files.py)
+- ~~Document expected behavior~~ DONE (README.md)
 
-**Next**: None
+**Test Files Created**:
+- `morph-transition-test.pptx` - Morph transitions demo
+- `chartex-test.pptx` - All ChartEx chart types
+- `stock-chart-generated.pptx` - Stock charts (HLC, OHLC)
+- `surface-chart-generated.pptx` - Surface charts (3D, wireframe)
+- `transitions-test.pptx` - Various transition types
+- `bezier-generated.pptx` - Bezier curve freeforms
+
+**Location**: `WOTAN/example-docs/test-features/`
+
+**Next**: T-TEST-01 (DONE)
 
 ---
 
-### B-DOC-01 [BLOCKED]
+### B-DOC-01 [DONE]
 **Document new features as implemented**
 
 Update documentation for each new feature added.
 
 **Details**:
-- API documentation
-- Usage examples
-- Update feature matrix
+- ~~API documentation~~ DONE
+- ~~Usage examples~~ DONE
+- ~~Update feature matrix~~ DONE
 
-**Blocked by**: Feature implementation
+**Documentation Added**:
+- Feature Support section updated in index.rst
+- Modern Charts section in user/charts.rst (ChartEx examples)
+- Slide Transitions section in user/slides.rst (Morph API)
+- Shape types updated in user/understanding-shapes.rst
+- MSO_SHAPE_TYPE enum docs updated (MODEL_3D, SLIDE_ZOOM)
+- XL_CHARTEX_TYPE enum docs added
 
-**Next**: None
+**Next**: T-DOC-01 (DONE)

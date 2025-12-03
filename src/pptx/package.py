@@ -155,15 +155,11 @@ class _ImageParts(object):
         return image_part if image_part else ImagePart.new(self._package, image)
 
     def _find_by_sha1(self, sha1: str) -> ImagePart | None:
-        """
-        Return an |ImagePart| object belonging to this package or |None| if
-        no matching image part is found. The image part is identified by the
-        SHA1 hash digest of the image binary it contains.
+        """Return |ImagePart| object belonging to this package or |None| if not found.
+
+        The image part is identified by the SHA1 hash digest of the image binary it contains.
         """
         for image_part in self:
-            # ---skip unknown/unsupported image types, like SVG---
-            if not hasattr(image_part, "sha1"):
-                continue
             if image_part.sha1 == sha1:
                 return image_part
         return None

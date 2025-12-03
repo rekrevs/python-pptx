@@ -221,6 +221,15 @@ class RadarPlot(_BasePlot):
     """
 
 
+class StockPlot(_BasePlot):
+    """A stock chart plot.
+
+    Stock charts display financial data such as High-Low-Close (HLC) or
+    Open-High-Low-Close (OHLC) values. The chart type is determined by the
+    number of series: 3 series for HLC, 4 series for OHLC.
+    """
+
+
 class XyPlot(_BasePlot):
     """
     An XY (scatter) plot.
@@ -243,6 +252,7 @@ def PlotFactory(xChart, chart):
             qn("c:pieChart"): PiePlot,
             qn("c:radarChart"): RadarPlot,
             qn("c:scatterChart"): XyPlot,
+            qn("c:stockChart"): StockPlot,
         }[xChart.tag]
     except KeyError:
         raise ValueError("unsupported plot type %s" % xChart.tag)
@@ -272,6 +282,7 @@ class PlotTypeInspector(object):
                 "LinePlot": cls._differentiate_line_chart_type,
                 "PiePlot": cls._differentiate_pie_chart_type,
                 "RadarPlot": cls._differentiate_radar_chart_type,
+                "StockPlot": cls._differentiate_stock_chart_type,
                 "XyPlot": cls._differentiate_xy_chart_type,
             }[plot.__class__.__name__]
         except KeyError:
@@ -381,6 +392,26 @@ class PlotTypeInspector(object):
         if noMarkers():
             return XL.RADAR
         return XL.RADAR_MARKERS
+
+    @classmethod
+    def _differentiate_stock_chart_type(cls, plot):
+        """Differentiate between stock chart variants based on series count.
+
+        Stock charts come in several variants:
+        - STOCK_HLC (High-Low-Close): 3 series
+        - STOCK_OHLC (Open-High-Low-Close): 4 series
+
+        Volume variants (STOCK_VHLC, STOCK_VOHLC) are detected when a bar chart
+        is present alongside the stock chart, but that logic is handled at the
+        chart level, not here.
+        """
+        stockChart = plot._element
+        ser_count = len(stockChart.xpath("c:ser"))
+
+        if ser_count == 4:
+            return XL.STOCK_OHLC
+        # Default to HLC for 3 series or any other count
+        return XL.STOCK_HLC
 
     @classmethod
     def _differentiate_xy_chart_type(cls, plot):

@@ -20,6 +20,7 @@ class CONTENT_TYPE:
     DML_DIAGRAM_LAYOUT = "application/vnd.openxmlformats-officedocument.drawingml.diagramLayout+xml"
     DML_DIAGRAM_STYLE = "application/vnd.openxmlformats-officedocument.drawingml.diagramStyle+xml"
     GIF = "image/gif"
+    GLB = "model/gltf-binary"
     INK = "application/inkml+xml"
     JPEG = "image/jpeg"
     MOV = "video/quicktime"
@@ -141,6 +142,7 @@ class CONTENT_TYPE:
         "application/vnd.openxmlformats-officedocument.spreadsheetml.volatileDependencies+xml"
     )
     SML_WORKSHEET = "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"
+    SVG = "image/svg+xml"
     SWF = "application/x-shockwave-flash"
     TIFF = "image/tiff"
     VIDEO = "video/unknown"
@@ -203,6 +205,7 @@ class RELATIONSHIP_TYPE:
         "re/certificate"
     )
     CHART = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"
+    CHART_EX = "http://schemas.microsoft.com/office/2014/relationships/chartEx"
     CHARTSHEET = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chartsheet"
     CHART_COLOR_STYLE = "http://schemas.microsoft.com/office/2011/relationships/chartColorStyle"
     CHART_USER_SHAPES = (

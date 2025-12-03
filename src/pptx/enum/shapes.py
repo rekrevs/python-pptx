@@ -822,6 +822,9 @@ class MSO_SHAPE_TYPE(BaseEnum):
     MEDIA = (16, "Media")
     """Media"""
 
+    MODEL_3D = (30, "3D Model")
+    """3D Model (GLB/glTF format)"""
+
     OLE_CONTROL_OBJECT = (12, "OLE control object")
     """OLE control object"""
 
@@ -833,6 +836,9 @@ class MSO_SHAPE_TYPE(BaseEnum):
 
     SCRIPT_ANCHOR = (18, "Script anchor")
     """Script anchor"""
+
+    SLIDE_ZOOM = (27, "Slide Zoom")
+    """Slide Zoom - displays a thumbnail of another slide and zooms to it when clicked."""
 
     TABLE = (19, "Table")
     """Table"""

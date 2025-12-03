@@ -27,49 +27,51 @@ A Python library that can:
 ## What "Complete" Means
 
 ### Presentation Level
-- [ ] Core properties (title, author, etc.)
+- [x] Core properties (title, author, etc.)
 - [ ] Custom properties
-- [ ] Slide dimensions and settings
+- [x] Slide dimensions and settings
 - [ ] Theme access and modification
 - [ ] Color schemes
 - [ ] Font schemes
 
 ### Slide Level
-- [ ] All slide types (regular, layout, master, notes, handout)
-- [ ] Slide relationships and inheritance
-- [ ] Background (all fill types)
-- [ ] Transitions (all types including Morph)
+- [x] All slide types (regular, layout, master, notes, handout)
+- [x] Slide relationships and inheritance
+- [x] Background (all fill types)
+- [x] **Transitions (including Morph)** ✅ xtend
 - [ ] Animations and timing
 - [ ] Slide comments
 
 ### Shape Level
-- [ ] All shape types (auto, text, picture, chart, table, group, connector, media, SmartArt, 3D models)
-- [ ] Shape properties (position, size, rotation, flip)
-- [ ] Shape geometry (preset and custom)
+- [x] All shape types (auto, text, picture, chart, table, group, connector, media)
+- [x] **SmartArt (read support)** ✅ xtend
+- [x] **3D models (detection/preserve)** ✅ xtend
+- [x] Shape properties (position, size, rotation, flip)
+- [x] Shape geometry (preset and custom)
 - [ ] Shape effects (shadow, reflection, glow, soft edge, 3D)
-- [ ] Shape styles
+- [x] Shape styles
 
 ### Text Level
-- [ ] Text frames and body properties
-- [ ] Paragraphs (all properties)
-- [ ] Runs (all character properties)
-- [ ] Bullet and numbering (all types)
-- [ ] Tabs and indentation
+- [x] Text frames and body properties
+- [x] Paragraphs (all properties)
+- [x] Runs (all character properties)
+- [ ] Bullet and numbering (full formatting - basic level done)
+- [ ] Tabs and indentation (XML only)
 - [ ] Text effects
-- [ ] Hyperlinks
+- [x] Hyperlinks
 
 ### Drawing Level
-- [ ] All fill types (solid, gradient, pattern, picture, group)
-- [ ] All line types (solid, gradient, pattern)
-- [ ] Line endings (arrows, etc.)
-- [ ] Color (RGB, theme, HSL, system, with all transformations)
+- [x] All fill types (solid, gradient, pattern, picture, group)
+- [x] All line types (solid, gradient, pattern)
+- [x] Line endings (arrows, etc.)
+- [x] Color (RGB, theme, HSL, system, with all transformations)
 
 ### Rich Content
-- [ ] Charts (all types, full data access)
-- [ ] Tables (all properties, merged cells)
-- [ ] SmartArt (structure, text, styling)
-- [ ] Media (video, audio)
-- [ ] Images (all formats including SVG)
+- [x] **Charts (all types including ChartEx)** ✅ xtend
+- [x] Tables (all properties, merged cells)
+- [x] **SmartArt (read structure and text)** ✅ xtend
+- [x] Media (video, audio)
+- [x] **Images (all formats including SVG)** ✅ xtend
 - [ ] OLE objects
 - [ ] Equations
 

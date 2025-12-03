@@ -1,0 +1,148 @@
+# Task T-SMART-01
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-SMART-01 |
+| Parent | B-SMART-01 |
+| State | DONE |
+| Created | 2024-12-03 |
+| Updated | 2024-12-03 |
+
+## Objective
+
+Add SmartArt (Diagram) read support to python-pptx, enabling detection and content extraction from SmartArt graphics in presentations.
+
+## Acceptance Criteria
+
+- [x] SmartArt diagram URI constant added to spec.py
+- [x] dgm: and dsp: namespaces registered in ns.py
+- [x] mc: namespace registered (MCE support for modern features)
+- [x] GraphicFrame.shape_type returns MSO_SHAPE_TYPE.DIAGRAM for SmartArt
+- [x] GraphicFrame.has_smart_art property added
+- [x] GraphicFrame.smart_art property returns SmartArt object
+- [x] SmartArt.all_text returns list of text strings from diagram nodes
+- [x] SmartArt.text returns all text as newline-separated string
+- [x] Round-trip preservation verified (existing functionality)
+- [x] All tests pass (2700 unit, 973 acceptance)
+
+## Context
+
+### SmartArt Structure in PPTX
+
+SmartArt consists of 4-5 related XML parts:
+- `ppt/diagrams/data1.xml` - Data model (text content, hierarchy)
+- `ppt/diagrams/layout1.xml` - Layout algorithm
+- `ppt/diagrams/colors1.xml` - Color scheme
+- `ppt/diagrams/style1.xml` - Visual styling
+- `ppt/diagrams/drawing1.xml` - Pre-rendered shapes (optional)
+
+In slide XML, SmartArt appears as:
+```xml
+<p:graphicFrame>
+  <a:graphic>
+    <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/diagram">
+      <dgm:relIds r:dm="rId1" r:lo="rId2" r:qs="rId3" r:cs="rId4"/>
+    </a:graphicData>
+  </a:graphic>
+</p:graphicFrame>
+```
+
+### Text Structure in Diagram Data
+
+Text is stored in `dgm:pt` (point) elements with DrawingML text structure:
+```xml
+<dgm:pt modelId="{GUID}">
+  <dgm:t>
+    <a:p><a:r><a:t>Node Text Here</a:t></a:r></a:p>
+  </dgm:t>
+</dgm:pt>
+```
+
+Node types:
+- `type="doc"` - Document root (structural)
+- `type="parTrans"` - Parent transition (structural)
+- `type="sibTrans"` - Sibling transition (structural)
+- No type attribute - Content node (contains text)
+
+## Files Created/Modified
+
+### New Files
+- `src/pptx/oxml/diagram.py` - OXML element classes for diagram data
+  - `CT_DiagramRelIds` - dgm:relIds element with r:dm, r:lo, r:qs, r:cs attributes
+  - `CT_DiagramDataPoint` - dgm:pt element with text extraction
+  - `CT_DiagramDataPointList` - dgm:ptLst element
+  - `CT_DiagramDataConnection` - dgm:cxn element
+  - `CT_DiagramDataConnectionList` - dgm:cxnLst element
+  - `CT_DiagramDataModel` - dgm:dataModel root element with all_text property
+- `src/pptx/smartart/__init__.py` - SmartArt package init
+- `src/pptx/smartart/smartart.py` - SmartArt class
+- `src/pptx/parts/diagram.py` - DiagramDataPart class
+
+### Modified Files
+- `src/pptx/__init__.py` - Registered DiagramDataPart for content type
+- `src/pptx/oxml/__init__.py` - Registered diagram OXML element classes
+- `src/pptx/oxml/shapes/graphfrm.py` - Added diagram_data_rId property to CT_GraphicalObjectData and CT_GraphicalObjectFrame
+- `src/pptx/shapes/graphfrm.py` - Added smart_art property to GraphicFrame
+
+## Evidence
+
+### Unit tests pass
+
+```
+$ pytest tests/ -q
+2700 passed in 3.00s
+```
+
+### Acceptance tests pass
+
+```
+$ behave features/ -q
+54 features passed, 0 failed, 0 skipped
+973 scenarios passed, 0 failed, 0 skipped
+2914 steps passed, 0 failed, 0 skipped
+```
+
+### SmartArt text extraction works
+
+```python
+>>> from pptx import Presentation
+>>> prs = Presentation('smartart-business-model-canvas.pptx')
+>>> for slide in prs.slides:
+...     for shape in slide.shapes:
+...         if hasattr(shape, 'has_smart_art') and shape.has_smart_art:
+...             smart_art = shape.smart_art
+...             print(f'Found {len(smart_art.all_text)} text items')
+...             for text in smart_art.all_text[:5]:
+...                 print(f'  - {text}')
+...
+Found 37 text items
+  - Value Propositions
+  - Ecologically and socially responsible garment
+  - Customer Segments
+  - Families
+  - Channels
+```
+
+## API Summary
+
+```python
+# Check if shape is SmartArt
+shape.has_smart_art  # bool
+
+# Access SmartArt object
+smart_art = shape.smart_art  # raises ValueError if not SmartArt
+
+# Get all text as list
+smart_art.all_text  # ['Text 1', 'Text 2', ...]
+
+# Get all text as string
+smart_art.text  # "Text 1\nText 2\n..."
+```
+
+## Outcome
+
+**State**: DONE
+
+All acceptance criteria met. SmartArt text extraction is now available via the `shape.smart_art` property, providing access to all text content in the diagram via `all_text` (list) or `text` (string) properties.

@@ -1,0 +1,64 @@
+# Task T-DOC-01
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-DOC-01 |
+| Parent | B-DOC-01 |
+| State | DONE |
+| Created | 2025-12-03 |
+
+## Objective
+
+Document the new features implemented in the xtend branch, including modern charts, SVG support, transitions, SmartArt, and new shape types.
+
+## Acceptance Criteria
+
+- [x] Update Feature Support section in main docs/index.rst
+- [x] Update MSO_SHAPE_TYPE enum documentation with new types (MODEL_3D, SLIDE_ZOOM)
+- [x] Add Modern Charts section to docs/user/charts.rst
+- [x] Document SVG support in understanding-shapes.rst
+- [x] Document Morph transitions in docs/user/slides.rst
+- [x] Add XL_CHARTEX_TYPE enum documentation
+- [x] Update shape types list in understanding-shapes.rst
+
+## Context
+
+The xtend branch has added significant new features that need documentation:
+- ChartEx modern charts (Treemap, Sunburst, Waterfall, Funnel, Box & Whisker, Map)
+- SVG image support with PNG fallback
+- Morph transitions
+- SmartArt read support
+- 3D model detection
+- Ink annotation preservation
+- Slide zoom preservation
+
+## Implementation Notes
+
+### Files Modified
+
+- `docs/index.rst` - Updated Feature Support section
+- `docs/api/enum/MsoShapeType.rst` - Added MODEL_3D and SLIDE_ZOOM
+- `docs/api/enum/XlChartExType.rst` - New file for ChartEx types
+- `docs/api/enum/index.rst` - Added XlChartExType to index
+- `docs/user/charts.rst` - Added Modern Charts section with examples
+- `docs/user/slides.rst` - Added Slide Transitions section with Morph example
+- `docs/user/understanding-shapes.rst` - Updated picture and shape type descriptions
+
+### Documentation Added
+
+1. **Feature Support** - High-level list of new capabilities
+2. **Modern Charts** - Full usage examples for Treemap, Waterfall, Map, etc.
+3. **Transitions** - Morph transition API with examples
+4. **Shape Types** - Updated list includes 3D models, ink, slide zoom
+
+## Evidence
+
+All documentation files updated. Documentation follows existing RST patterns and conventions.
+
+## Outcome
+
+**State**: DONE
+
+Documentation for all major new features has been added to the user guide and API reference.

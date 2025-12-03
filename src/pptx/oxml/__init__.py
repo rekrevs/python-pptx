@@ -131,6 +131,10 @@ from pptx.oxml.chart.plot import (  # noqa: E402
     CT_PieChart,
     CT_RadarChart,
     CT_ScatterChart,
+    CT_StockChart,
+    CT_Surface3DChart,
+    CT_SurfaceChart,
+    CT_UpDownBars,
 )
 
 register_element_cls("c:area3DChart", CT_Area3DChart)
@@ -147,6 +151,10 @@ register_element_cls("c:overlap", CT_Overlap)
 register_element_cls("c:pieChart", CT_PieChart)
 register_element_cls("c:radarChart", CT_RadarChart)
 register_element_cls("c:scatterChart", CT_ScatterChart)
+register_element_cls("c:stockChart", CT_StockChart)
+register_element_cls("c:surface3DChart", CT_Surface3DChart)
+register_element_cls("c:surfaceChart", CT_SurfaceChart)
+register_element_cls("c:upDownBars", CT_UpDownBars)
 
 
 from pptx.oxml.chart.series import (  # noqa: E402
@@ -297,6 +305,7 @@ from pptx.oxml.shapes.autoshape import (  # noqa: E402
     CT_NonVisualDrawingShapeProps,
     CT_Path2D,
     CT_Path2DClose,
+    CT_Path2DCubicBezierTo,
     CT_Path2DLineTo,
     CT_Path2DList,
     CT_Path2DMoveTo,
@@ -309,6 +318,7 @@ register_element_cls("a:avLst", CT_GeomGuideList)
 register_element_cls("a:custGeom", CT_CustomGeometry2D)
 register_element_cls("a:gd", CT_GeomGuide)
 register_element_cls("a:close", CT_Path2DClose)
+register_element_cls("a:cubicBezTo", CT_Path2DCubicBezierTo)
 register_element_cls("a:lnTo", CT_Path2DLineTo)
 register_element_cls("a:moveTo", CT_Path2DMoveTo)
 register_element_cls("a:path", CT_Path2D)
@@ -484,3 +494,95 @@ register_element_cls("p:txBody", CT_TextBody)
 from pptx.oxml.theme import CT_OfficeStyleSheet  # noqa: E402
 
 register_element_cls("a:theme", CT_OfficeStyleSheet)
+
+
+from pptx.oxml.diagram import (  # noqa: E402
+    CT_DiagramDataConnection,
+    CT_DiagramDataConnectionList,
+    CT_DiagramDataModel,
+    CT_DiagramDataPoint,
+    CT_DiagramDataPointList,
+    CT_DiagramRelIds,
+)
+
+register_element_cls("dgm:cxn", CT_DiagramDataConnection)
+register_element_cls("dgm:cxnLst", CT_DiagramDataConnectionList)
+register_element_cls("dgm:dataModel", CT_DiagramDataModel)
+register_element_cls("dgm:pt", CT_DiagramDataPoint)
+register_element_cls("dgm:ptLst", CT_DiagramDataPointList)
+register_element_cls("dgm:relIds", CT_DiagramRelIds)
+
+
+from pptx.oxml.chartex.chartex import (  # noqa: E402
+    CT_ChartExAxis,
+    CT_ChartExChart,
+    CT_ChartExData,
+    CT_ChartExDataElement,
+    CT_ChartExDataId,
+    CT_ChartExDataPoint,
+    CT_ChartExExternalData,
+    CT_ChartExFormula,
+    CT_ChartExIdx,
+    CT_ChartExLayoutPr,
+    CT_ChartExLegend,
+    CT_ChartExLevel,
+    CT_ChartExNumDim,
+    CT_ChartExParentLabelLayout,
+    CT_ChartExPlotArea,
+    CT_ChartExPlotAreaRegion,
+    CT_ChartExSeries,
+    CT_ChartExSpace,
+    CT_ChartExStatistics,
+    CT_ChartExStrDim,
+    CT_ChartExSubtotals,
+    CT_ChartExText,
+    CT_ChartExTitle,
+    CT_ChartExVisibility,
+)
+
+register_element_cls("cx:axis", CT_ChartExAxis)
+register_element_cls("cx:chart", CT_ChartExChart)
+register_element_cls("cx:chartData", CT_ChartExData)
+register_element_cls("cx:chartSpace", CT_ChartExSpace)
+register_element_cls("cx:data", CT_ChartExDataElement)
+register_element_cls("cx:dataId", CT_ChartExDataId)
+register_element_cls("cx:externalData", CT_ChartExExternalData)
+register_element_cls("cx:f", CT_ChartExFormula)
+register_element_cls("cx:idx", CT_ChartExIdx)
+register_element_cls("cx:layoutPr", CT_ChartExLayoutPr)
+register_element_cls("cx:legend", CT_ChartExLegend)
+register_element_cls("cx:lvl", CT_ChartExLevel)
+register_element_cls("cx:numDim", CT_ChartExNumDim)
+register_element_cls("cx:parentLabelLayout", CT_ChartExParentLabelLayout)
+register_element_cls("cx:plotArea", CT_ChartExPlotArea)
+register_element_cls("cx:plotAreaRegion", CT_ChartExPlotAreaRegion)
+register_element_cls("cx:pt", CT_ChartExDataPoint)
+register_element_cls("cx:series", CT_ChartExSeries)
+register_element_cls("cx:statistics", CT_ChartExStatistics)
+register_element_cls("cx:strDim", CT_ChartExStrDim)
+register_element_cls("cx:subtotals", CT_ChartExSubtotals)
+register_element_cls("cx:title", CT_ChartExTitle)
+register_element_cls("cx:tx", CT_ChartExText)
+register_element_cls("cx:visibility", CT_ChartExVisibility)
+
+
+from pptx.oxml.slide.transition import (  # noqa: E402
+    CT_MorphTransition,
+    CT_SlideTransition,
+)
+
+register_element_cls("p:transition", CT_SlideTransition)
+register_element_cls("p159:morph", CT_MorphTransition)
+
+
+from pptx.oxml.slide.zoom import (  # noqa: E402
+    CT_SectionZoomObject,
+    CT_SlideZoom,
+    CT_SlideZoomObject,
+    CT_SummaryZoomSection,
+    CT_ZoomObjectProperties,
+)
+
+register_element_cls("pslz:sldZm", CT_SlideZoom)
+register_element_cls("pslz:sldZmObj", CT_SlideZoomObject)
+register_element_cls("p166:zmPr", CT_ZoomObjectProperties)

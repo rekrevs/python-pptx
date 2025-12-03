@@ -10,7 +10,11 @@ from typing import TYPE_CHECKING, TypedDict
 from pptx.enum.shapes import MSO_SHAPE
 
 GRAPHIC_DATA_URI_CHART = "http://schemas.openxmlformats.org/drawingml/2006/chart"
+GRAPHIC_DATA_URI_CHARTEX = "http://schemas.microsoft.com/office/drawing/2014/chartex"
+GRAPHIC_DATA_URI_DIAGRAM = "http://schemas.openxmlformats.org/drawingml/2006/diagram"
+GRAPHIC_DATA_URI_MODEL3D = "http://schemas.microsoft.com/office/drawing/2017/model3d"
 GRAPHIC_DATA_URI_OLEOBJ = "http://schemas.openxmlformats.org/presentationml/2006/ole"
+GRAPHIC_DATA_URI_SLIDE_ZOOM = "http://schemas.microsoft.com/office/powerpoint/2016/slidezoom"
 GRAPHIC_DATA_URI_TABLE = "http://schemas.openxmlformats.org/drawingml/2006/table"
 
 if TYPE_CHECKING:

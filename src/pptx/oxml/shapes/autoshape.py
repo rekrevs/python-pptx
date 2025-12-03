@@ -86,10 +86,12 @@ class CT_Path2D(BaseOxmlElement):
     """`a:path` custom element class."""
 
     _add_close: Callable[[], CT_Path2DClose]
+    _add_cubicBezTo: Callable[[], CT_Path2DCubicBezierTo]
     _add_lnTo: Callable[[], CT_Path2DLineTo]
     _add_moveTo: Callable[[], CT_Path2DMoveTo]
 
     close = ZeroOrMore("a:close", successors=())
+    cubicBezTo = ZeroOrMore("a:cubicBezTo", successors=())
     lnTo = ZeroOrMore("a:lnTo", successors=())
     moveTo = ZeroOrMore("a:moveTo", successors=())
     w: Length | None = OptionalAttribute(  # pyright: ignore[reportAssignmentType]
@@ -105,6 +107,30 @@ class CT_Path2D(BaseOxmlElement):
         The new `a:close` element is appended to this `a:path` element.
         """
         return self._add_close()
+
+    def add_cubicBezTo(
+        self,
+        cp1_x: Length,
+        cp1_y: Length,
+        cp2_x: Length,
+        cp2_y: Length,
+        end_x: Length,
+        end_y: Length,
+    ) -> CT_Path2DCubicBezierTo:
+        """Return a newly created `a:cubicBezTo` subtree.
+
+        A cubic Bezier curve from the current point to (end_x, end_y) using
+        (cp1_x, cp1_y) and (cp2_x, cp2_y) as control points.
+        """
+        cubicBezTo = self._add_cubicBezTo()
+        # Add the three required points: cp1, cp2, end
+        pt1 = cubicBezTo._add_pt()
+        pt1.x, pt1.y = cp1_x, cp1_y
+        pt2 = cubicBezTo._add_pt()
+        pt2.x, pt2.y = cp2_x, cp2_y
+        pt3 = cubicBezTo._add_pt()
+        pt3.x, pt3.y = end_x, end_y
+        return cubicBezTo
 
     def add_lnTo(self, x: Length, y: Length) -> CT_Path2DLineTo:
         """Return a newly created `a:lnTo` subtree with end point *(x, y)*.
@@ -129,6 +155,18 @@ class CT_Path2D(BaseOxmlElement):
 
 class CT_Path2DClose(BaseOxmlElement):
     """`a:close` custom element class."""
+
+
+class CT_Path2DCubicBezierTo(BaseOxmlElement):
+    """`a:cubicBezTo` custom element class.
+
+    A cubic Bezier curve element containing exactly 3 points:
+    control point 1, control point 2, and the end point.
+    """
+
+    _add_pt: Callable[[], CT_AdjPoint2D]
+
+    pt = ZeroOrMore("a:pt", successors=())
 
 
 class CT_Path2DLineTo(BaseOxmlElement):

@@ -490,3 +490,43 @@ class XL_TICK_LABEL_POSITION(BaseXmlEnum):
 
     NONE = (-4142, "none", "No tick labels.")
     """No tick labels."""
+
+
+class XL_CHARTEX_TYPE(BaseXmlEnum):
+    """Specifies the type of a ChartEx chart (Office 2016+).
+
+    ChartEx charts use the `cx:` namespace and are distinct from traditional
+    charts using the `c:` namespace. They were introduced in Office 2016.
+
+    Example::
+
+        from pptx.enum.chart import XL_CHARTEX_TYPE
+        from pptx.chartex.data import ChartExData
+
+        data = ChartExData()
+        data.add_series("Sales", ["Q1", "Q2", "Q3", "Q4"], [100, 150, 200, 175])
+        chart = shapes.add_chartex(
+            XL_CHARTEX_TYPE.TREEMAP, x, y, cx, cy, data
+        )
+
+    These chart types do not have corresponding MS API values; the integer values
+    are arbitrary identifiers for internal use.
+    """
+
+    TREEMAP = (1, "treemap", "Treemap chart showing hierarchical data as nested rectangles.")
+    """Treemap chart showing hierarchical data as nested rectangles."""
+
+    SUNBURST = (2, "sunburst", "Sunburst chart showing hierarchical data as concentric rings.")
+    """Sunburst chart showing hierarchical data as concentric rings."""
+
+    WATERFALL = (3, "waterfall", "Waterfall chart showing running total with increases/decreases.")
+    """Waterfall chart showing running total with increases and decreases."""
+
+    FUNNEL = (4, "funnel", "Funnel chart showing values across stages of a process.")
+    """Funnel chart showing values across stages of a process."""
+
+    BOX_AND_WHISKER = (5, "boxWhisker", "Box & Whisker chart showing statistical distribution.")
+    """Box & Whisker chart showing statistical distribution."""
+
+    REGION_MAP = (6, "regionMap", "Map chart showing geographic data by region.")
+    """Map chart showing geographic data colored by region/country."""

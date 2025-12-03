@@ -166,6 +166,14 @@ class RadarSeries(_BaseCategorySeries, _MarkerMixin):
     """
 
 
+class StockSeries(_BaseCategorySeries, _MarkerMixin):
+    """A data point series belonging to a stock chart.
+
+    Stock chart series contain high, low, close (and optionally open) values
+    for financial data visualization.
+    """
+
+
 class XySeries(_BaseSeries, _MarkerMixin):
     """
     A data point series belonging to an XY (scatter) plot.
@@ -251,6 +259,7 @@ def _SeriesFactory(ser):
             qn("c:pieChart"): PieSeries,
             qn("c:radarChart"): RadarSeries,
             qn("c:scatterChart"): XySeries,
+            qn("c:stockChart"): StockSeries,
         }[xChart_tag]
     except KeyError:
         raise NotImplementedError("series class for %s not yet implemented" % xChart_tag)

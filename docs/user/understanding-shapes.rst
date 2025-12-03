@@ -21,11 +21,14 @@ auto shape
    without a fill and without an outline.
 
 picture
-   A raster image, like a photograph or clip art is referred to as a *picture*
-   in PowerPoint. It's its own kind of shape with different behaviors than an
-   autoshape. Note that an auto shape can have a picture fill, in which an
-   image "shows through" as the background of the shape instead of a fill color
-   or gradient. That's a different thing. But cool.
+   An image is referred to as a *picture* in PowerPoint. This includes raster
+   images like photographs (JPEG, PNG) as well as vector images (SVG, EMF, WMF).
+   It's its own kind of shape with different behaviors than an autoshape. Note
+   that an auto shape can have a picture fill, in which an image "shows through"
+   as the background of the shape instead of a fill color or gradient. That's
+   a different thing. But cool. SVG images can be inserted using
+   ``shapes.add_svg_picture()`` which automatically generates a PNG fallback for
+   older PowerPoint versions.
 
 graphic frame
    This is the technical name for the container that holds a table, a chart,
@@ -48,12 +51,10 @@ line/connector
    very handy.
 
 content part
-   I actually have only the vaguest notion of what these are. It has something
-   to do with embedding "foreign" XML like SVG in with the presentation. I'm
-   pretty sure PowerPoint itself doesn't do anything with these. My strategy
-   is to ignore them. Working good so far.
+   These are used for embedding "foreign" content in a presentation. They're
+   rarely encountered in normal use and are preserved on round-trip.
 
-As for real-life shapes, there are these nine types:
+As for real-life shapes, there are these types:
 
 * shape shapes -- auto shapes with fill and an outline
 * text boxes -- auto shapes with no fill and no outline
@@ -61,11 +62,15 @@ As for real-life shapes, there are these nine types:
   be inherited on slides that use that layout, allowing content to be added
   that takes on the formatting of the placeholder
 * line/connector -- as described above
-* picture -- as described above
+* picture -- raster images (JPEG, PNG) or vector images (SVG, EMF, WMF)
 * table -- that row and column thing
-* chart -- pie chart, line chart, etc.
-* smart art -- not supported yet, although preserved if present
+* chart -- traditional charts (pie, line, bar) and modern ChartEx types
+  (treemap, sunburst, waterfall, funnel, box & whisker, map)
+* smart art -- diagrams with hierarchical text content (read support)
 * media clip -- video or audio
+* 3D model -- GLB/glTF format models (Office 2017+, preserved on round-trip)
+* ink -- pen/stylus annotations (preserved on round-trip)
+* slide zoom -- interactive zoom navigation (Office 2016+, preserved on round-trip)
 
 
 Accessing the shapes on a slide

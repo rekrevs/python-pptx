@@ -1,8 +1,8 @@
-# Current State: python-pptx v1.0.2
+# Current State: python-pptx xtend branch
 
 ## Overview
 
-python-pptx is a mature, production-grade Python library for creating, reading, and updating PowerPoint (.pptx) files. It requires Python 3.8+ and has been stable since v1.0.0.
+python-pptx is a mature, production-grade Python library for creating, reading, and updating PowerPoint (.pptx) files. The `xtend` branch extends the upstream v1.0.2 with support for modern PowerPoint features (2016+).
 
 ## Architecture
 
@@ -26,10 +26,10 @@ OPC (Open Packaging Convention) Package System (pptx.opc)
 
 | Component | Files | Lines of Code |
 |-----------|-------|---------------|
-| Source Code | 101 | 27,830 |
-| Unit Tests | 64 | 24,250 |
+| Source Code | ~110 | ~30,000 |
+| Unit Tests | 64+ | ~25,000 |
 | Behavioral Tests | 58 features | ~2,500 |
-| **Total** | ~230 | ~54,580 |
+| **Total** | ~240 | ~57,500 |
 
 ## Dependencies
 
@@ -52,20 +52,25 @@ OPC (Open Packaging Convention) Package System (pptx.opc)
 - Slide background fill (solid, gradient, pattern, image)
 - Named slides
 - Slide notes
+- **Morph transitions (xtend)** - Full API for byObject/byWord/byChar
 
 ### Shape Features
 - **AutoShapes**: 190+ types (rectangles, circles, arrows, stars, callouts, flowchart, action buttons)
 - **Text Shapes**: Text frames with full paragraph/character formatting
 - **Pictures**: Add, crop, resize images (JPG, PNG, BMP, GIF, TIFF, EMF, WMF)
+- **SVG Images (xtend)**: Vector graphics with automatic PNG fallback
 - **Group Shapes**: Group/ungroup multiple shapes
 - **Connectors**: Lines, arrows with connection points
-- **Freeform Shapes**: Custom shapes with straight line segments
+- **Freeform Shapes**: Custom shapes with straight lines and **Bezier curves (xtend)**
 - **Media**: Embed video/audio files
 - **Placeholders**: Title, content, picture, table, chart placeholders with inheritance
 
 ### Chart Features
 - Full chart data manipulation (XlsxWriter integration)
-- Chart types: column, bar, line, pie, doughnut, area, scatter, bubble, radar
+- **Traditional charts**: column, bar, line, pie, doughnut, area, scatter, bubble, radar
+- **Stock charts (xtend)**: HLC, OHLC, VHLC, VOHLC
+- **Surface charts (xtend)**: 3D surface, wireframe, top view
+- **Modern ChartEx charts (xtend)**: Treemap, Sunburst, Waterfall, Funnel, Box & Whisker, Map
 - 3D variants: Area3D, Bar3D, Column3D, Line3D, Pie3D
 - Axis customization: scaling, crossing, tick marks, labels, gridlines
 - Series formatting: color, dash style, marker style/size
@@ -100,12 +105,18 @@ OPC (Open Packaging Convention) Package System (pptx.opc)
 - Action button support
 
 ### Media Support
-- Image formats: JPEG, PNG, BMP, GIF, TIFF, EMF, WMF
+- Image formats: JPEG, PNG, BMP, GIF, TIFF, EMF, WMF, **SVG (xtend)**
 - Video formats: ASF, AVI, MOV, MP4, MPEG, SWF, WMV
+
+### Modern Features (xtend)
+- **SmartArt**: Read structure and extract text content
+- **3D Models**: Detected (MODEL_3D shape type), preserved on round-trip
+- **Ink Annotations**: Preserved on round-trip
+- **Slide Zoom**: Detected (SLIDE_ZOOM shape type), preserved on round-trip
 
 ## OXML Coverage
 
-The library has 192 custom element classes covering:
+The library has 200+ custom element classes covering:
 
 | Domain | Elements |
 |--------|----------|
@@ -117,6 +128,8 @@ The library has 192 custom element classes covering:
 | Fill | CT_SolidColorFillProperties, CT_GradientFillProperties, CT_PatternFillProperties |
 | Color | CT_SRgbColor, CT_SchemeColor, CT_HslColor |
 | Charts | Full chart element hierarchy |
+| ChartEx (xtend) | CT_ChartExSpace, CT_ChartExSeries, CT_ChartExData |
+| Transitions (xtend) | CT_SlideTransition, CT_MorphTransition |
 
 ## XML Namespaces Supported
 
@@ -124,11 +137,19 @@ The library has 192 custom element classes covering:
 - `a:` - DrawingML (shapes, text, colors)
 - `r:` - Relationships
 - `c:` - Charts
+- `cx:` - ChartEx (modern charts) **(xtend)**
 - `pic:` - Pictures
+- `asvg:` - SVG images **(xtend)**
+- `dgm:` - Diagrams/SmartArt **(xtend)**
+- `p159:` - PowerPoint 2015 (Morph) **(xtend)**
+- `p166:` - PowerPoint 2016 (Zoom) **(xtend)**
+- `am3d:` - 3D Models **(xtend)**
+- `inkml:` - Ink annotations **(xtend)**
 
 ## Test Coverage
 
-- **Unit Tests**: 64 test files covering all major modules
+- **Unit Tests**: 2700+ tests covering all major modules
 - **BDD Tests**: 58 Gherkin feature files with step implementations
 - Testing frameworks: pytest, behave
 - Test fixtures in `tests/unit/unitdata/`
+- All tests passing

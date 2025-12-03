@@ -1,0 +1,72 @@
+# Task T-MEDIA-01
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-MEDIA-01 |
+| Parent | B-MEDIA-01 |
+| State | DONE |
+| Created | 2025-12-03 |
+
+## Objective
+
+Add basic read/round-trip support for 3D models (GLB format) in presentations. When a PPTX with 3D models is opened and saved, the models should be preserved.
+
+## Acceptance Criteria
+
+- [x] Register `am3d:` namespace for 3D models
+- [x] Add `MODEL_3D` to `MSO_SHAPE_TYPE` enum
+- [x] Add content type for GLB files
+- [x] Add default content type mapping for .glb extension
+- [x] Detect 3D models in GraphicFrame shapes (`has_model_3d` property)
+- [x] Return `MSO_SHAPE_TYPE.MODEL_3D` for 3D model shapes
+- [x] Unit tests pass
+
+## Context
+
+3D models use:
+- Namespace: `http://schemas.microsoft.com/office/drawing/2017/model3d` (am3d:)
+- Content type: `model/gltf-binary` for .glb files
+- GraphicData URI: `http://schemas.microsoft.com/office/drawing/2017/model3d`
+- Storage: `ppt/media/model3d1.glb`
+
+This is read/preserve support - creating new 3D models would require complex 3D rendering metadata.
+
+## Implementation Notes
+
+### Files Modified
+
+- `src/pptx/oxml/ns.py` - Register `am3d:` namespace
+- `src/pptx/enum/shapes.py` - Add `MODEL_3D` to `MSO_SHAPE_TYPE` (value 30)
+- `src/pptx/opc/constants.py` - Add `GLB = "model/gltf-binary"` content type
+- `src/pptx/opc/spec.py` - Add `("glb", CT.GLB)` to default content types
+- `src/pptx/spec.py` - Add `GRAPHIC_DATA_URI_MODEL3D`
+- `src/pptx/shapes/graphfrm.py` - Add `has_model_3d` property and handle MODEL_3D in `shape_type`
+
+## Evidence
+
+### Tests Run
+
+```
+$ pytest tests/shapes/test_graphfrm.py tests/enum/test_shapes.py -v
+32 passed in 0.10s
+```
+
+### Infrastructure Verification
+
+```python
+>>> from pptx.oxml.ns import qn
+>>> qn('am3d:model3d')
+'{http://schemas.microsoft.com/office/drawing/2017/model3d}model3d'
+
+>>> from pptx.enum.shapes import MSO_SHAPE_TYPE
+>>> MSO_SHAPE_TYPE.MODEL_3D
+MODEL_3D (30)
+```
+
+## Outcome
+
+**State**: DONE
+
+3D model read/preserve support has been successfully implemented. PPTX files containing 3D models can be opened and their shape type correctly identified as `MSO_SHAPE_TYPE.MODEL_3D`.

@@ -18,6 +18,7 @@ from pptx.util import lazyproperty
 
 if TYPE_CHECKING:
     from pptx.chart.data import ChartData
+    from pptx.chartex.data import ChartExData
     from pptx.enum.chart import XL_CHART_TYPE
     from pptx.media import Video
     from pptx.parts.image import Image, ImagePart
@@ -175,6 +176,19 @@ class SlidePart(BaseSlidePart):
         part by `rId`.
         """
         return self.relate_to(ChartPart.new(chart_type, chart_data, self._package), RT.CHART)
+
+    def add_chartex_part(self, layout_id: str, chart_data: "ChartExData") -> str:
+        """Return str rId of new |ChartExPart| object containing ChartEx chart.
+
+        `layout_id` specifies the chart type: "treemap", "sunburst", "waterfall",
+        "funnel", or "boxWhisker". The chart depicts `chart_data` and is related to
+        this slide by the returned `rId`.
+        """
+        from pptx.parts.chartex import ChartExPart
+
+        return self.relate_to(
+            ChartExPart.new(layout_id, chart_data, self._package), RT.CHART_EX
+        )
 
     def add_embedded_ole_object_part(
         self, prog_id: PROG_ID | str, ole_object_file: str | IO[bytes]

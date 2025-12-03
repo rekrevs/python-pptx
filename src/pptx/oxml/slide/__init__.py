@@ -19,6 +19,30 @@ from pptx.oxml.xmlchemy import (
     ZeroOrOneChoice,
 )
 
+# Re-export transition classes
+from pptx.oxml.slide.transition import (
+    CT_CornerDirectionTransition,
+    CT_EightDirectionTransition,
+    CT_EmptyTransition,
+    CT_MorphTransition,
+    CT_OptionalBlackTransition,
+    CT_OrientationTransition,
+    CT_SideDirectionTransition,
+    CT_SlideTransition,
+    CT_SplitTransition,
+    CT_WheelTransition,
+    CT_ZoomTransition,
+)
+
+# Re-export zoom classes
+from pptx.oxml.slide.zoom import (
+    CT_SectionZoomObject,
+    CT_SlideZoom,
+    CT_SlideZoomObject,
+    CT_SummaryZoomSection,
+    CT_ZoomObjectProperties,
+)
+
 if TYPE_CHECKING:
     from pptx.oxml.shapes.groupshape import CT_GroupShape
 
@@ -162,6 +186,9 @@ class CT_Slide(_BaseSlideElement):
     _tag_seq = ("p:cSld", "p:clrMapOvr", "p:transition", "p:timing", "p:extLst")
     cSld: CT_CommonSlideData = OneAndOnlyOne("p:cSld")  # pyright: ignore[reportAssignmentType]
     clrMapOvr = ZeroOrOne("p:clrMapOvr", successors=_tag_seq[2:])
+    transition: CT_SlideTransition | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "p:transition", successors=_tag_seq[3:]
+    )
     timing = ZeroOrOne("p:timing", successors=_tag_seq[4:])
     del _tag_seq
 
@@ -345,3 +372,36 @@ class CT_TLMediaNodeVideo(BaseOxmlElement):
     _tag_seq = ("p:cMediaNode",)
     cMediaNode = OneAndOnlyOne("p:cMediaNode")
     del _tag_seq
+
+
+__all__ = [
+    "CT_Background",
+    "CT_BackgroundProperties",
+    "CT_CommonSlideData",
+    "CT_CornerDirectionTransition",
+    "CT_EightDirectionTransition",
+    "CT_EmptyTransition",
+    "CT_MorphTransition",
+    "CT_NotesMaster",
+    "CT_NotesSlide",
+    "CT_OptionalBlackTransition",
+    "CT_OrientationTransition",
+    "CT_SectionZoomObject",
+    "CT_SideDirectionTransition",
+    "CT_Slide",
+    "CT_SlideLayout",
+    "CT_SlideLayoutIdList",
+    "CT_SlideLayoutIdListEntry",
+    "CT_SlideMaster",
+    "CT_SlideTiming",
+    "CT_SlideTransition",
+    "CT_SlideZoom",
+    "CT_SlideZoomObject",
+    "CT_SplitTransition",
+    "CT_SummaryZoomSection",
+    "CT_TimeNodeList",
+    "CT_TLMediaNodeVideo",
+    "CT_WheelTransition",
+    "CT_ZoomObjectProperties",
+    "CT_ZoomTransition",
+]

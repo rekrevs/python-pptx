@@ -90,5 +90,11 @@ TEXT_EFFECT
 WEB_VIDEO
     Web video
 
+MODEL_3D
+    3D Model (GLB/glTF format, Office 2017+)
+
+SLIDE_ZOOM
+    Slide Zoom shape (Office 2016+)
+
 MIXED
     Mixed shape types

@@ -1,0 +1,128 @@
+# Task T-SVG-01
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-SVG-01 |
+| Parent | B-SVG-01 |
+| State | DONE |
+| Created | 2024-12-03 |
+| Updated | 2024-12-03 |
+
+## Objective
+
+Add SVG image support to python-pptx, enabling reading, inserting, and round-tripping SVG images in presentations.
+
+## Acceptance Criteria
+
+- [x] SVG content type registered in constants
+- [x] SVG extension mapped in spec.py
+- [x] SVG images not skipped during package iteration
+- [x] SVG Image class handles SVG files (without PIL)
+- [x] `asvg:` namespace registered for SVG extension
+- [x] Can insert new SVG images (with PNG fallback) via `add_svg_picture()`
+- [x] All tests pass (2700 unit, 973 acceptance)
+
+## Context
+
+PowerPoint stores SVG as:
+- Primary: PNG or other fallback (for older versions)
+- Extension: `asvg:svgBlip` element within `a:extLst` (for modern versions)
+- Extension URI: `{96DAC541-7B7A-43D3-8B79-37D633B846F1}`
+
+## Implementation
+
+### SVG Picture XML Structure
+
+```xml
+<p:pic>
+  <p:blipFill>
+    <a:blip r:embed="rId_to_fallback_png">
+      <a:extLst>
+        <a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">
+          <asvg:svgBlip r:embed="rId_to_svg"/>
+        </a:ext>
+      </a:extLst>
+    </a:blip>
+    <a:stretch><a:fillRect/></a:stretch>
+  </p:blipFill>
+  ...
+</p:pic>
+```
+
+### Files Created/Modified
+
+- `src/pptx/oxml/ns.py` - Added `asvg:` namespace
+- `src/pptx/oxml/shapes/picture.py` - Added `new_svg_pic()` and `_pic_svg_tmpl()`
+- `src/pptx/oxml/shapes/groupshape.py` - Added `add_svg_pic()` method
+- `src/pptx/shapes/shapetree.py` - Added `add_svg_picture()` method
+
+### Previous work (read support)
+- `src/pptx/opc/constants.py` - Added `SVG = "image/svg+xml"`
+- `src/pptx/opc/spec.py` - Added SVG to content types
+- `src/pptx/parts/image.py` - Added `SvgImage` class
+- `src/pptx/package.py` - Removed SVG skip logic
+
+## Evidence
+
+### Unit tests pass
+
+```
+$ pytest tests/ -q
+2700 passed in 3.27s
+```
+
+### Acceptance tests pass
+
+```
+$ behave features/ -q
+54 features passed, 0 failed, 0 skipped
+973 scenarios passed, 0 failed, 0 skipped
+2914 steps passed, 0 failed, 0 skipped
+```
+
+### SVG insertion works
+
+```python
+>>> from pptx import Presentation
+>>> from pptx.util import Inches
+>>> prs = Presentation()
+>>> slide = prs.slides.add_slide(prs.slide_layouts[6])
+>>> shape = slide.shapes.add_svg_picture(
+...     'logo.svg',
+...     'logo.png',  # fallback for older PowerPoint
+...     Inches(1), Inches(1),
+...     Inches(3), Inches(3)
+... )
+>>> shape.shape_type
+PICTURE (13)
+>>> prs.save('test.pptx')
+```
+
+The generated PPTX contains:
+- `ppt/media/image1.svg` - The SVG file
+- `ppt/media/image2.png` - The PNG fallback
+- Slide XML with `asvg:svgBlip` extension
+
+## API Summary
+
+```python
+# Insert SVG with fallback
+shape = slide.shapes.add_svg_picture(
+    svg_file,       # str path or file-like object
+    fallback_file,  # PNG/JPEG for older PowerPoint
+    left, top,      # position
+    width, height   # optional size
+)
+```
+
+## Outcome
+
+**State**: DONE
+
+All acceptance criteria met. SVG support is now complete:
+- SVG images can be read without errors
+- SVG images can be inserted with `add_svg_picture()`
+- PNG fallback is included for older PowerPoint versions
+- Modern PowerPoint (2016+) displays the SVG, older versions display the fallback

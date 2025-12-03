@@ -13,7 +13,10 @@ from pptx.shapes.base import BaseShape
 from pptx.shared import ParentedElementProxy
 from pptx.spec import (
     GRAPHIC_DATA_URI_CHART,
+    GRAPHIC_DATA_URI_DIAGRAM,
+    GRAPHIC_DATA_URI_MODEL3D,
     GRAPHIC_DATA_URI_OLEOBJ,
+    GRAPHIC_DATA_URI_SLIDE_ZOOM,
     GRAPHIC_DATA_URI_TABLE,
 )
 from pptx.table import Table
@@ -24,7 +27,9 @@ if TYPE_CHECKING:
     from pptx.dml.effect import ShadowFormat
     from pptx.oxml.shapes.graphfrm import CT_GraphicalObjectData, CT_GraphicalObjectFrame
     from pptx.parts.chart import ChartPart
+    from pptx.parts.diagram import DiagramDataPart
     from pptx.parts.slide import BaseSlidePart
+    from pptx.smartart import SmartArt
     from pptx.types import ProvidesPart
 
 
@@ -95,26 +100,88 @@ class GraphicFrame(BaseShape):
         raise NotImplementedError("shadow property on GraphicFrame not yet supported")
 
     @property
+    def has_model_3d(self) -> bool:
+        """|True| if this graphic frame contains a 3D model, |False| otherwise.
+
+        A 3D model is an embedded GLB/glTF file that can be rotated and viewed
+        from different angles in PowerPoint.
+        """
+        return self._graphicFrame.graphicData_uri == GRAPHIC_DATA_URI_MODEL3D
+
+    @property
+    def has_slide_zoom(self) -> bool:
+        """|True| if this graphic frame contains a Slide Zoom, |False| otherwise.
+
+        A Slide Zoom is a special shape that displays a thumbnail of another slide
+        and navigates to that slide with a zoom transition when clicked.
+        """
+        return self._graphicFrame.graphicData_uri == GRAPHIC_DATA_URI_SLIDE_ZOOM
+
+    @property
+    def has_smart_art(self) -> bool:
+        """|True| if this graphic frame contains a SmartArt diagram, |False| otherwise."""
+        return self._graphicFrame.graphicData_uri == GRAPHIC_DATA_URI_DIAGRAM
+
+    @property
+    def smart_art(self) -> SmartArt:
+        """The |SmartArt| object containing the SmartArt diagram in this graphic frame.
+
+        Raises |ValueError| if this graphic frame does not contain a SmartArt diagram.
+
+        Example::
+
+            >>> shape = slide.shapes[0]
+            >>> shape.has_smart_art
+            True
+            >>> smart_art = shape.smart_art
+            >>> smart_art.all_text
+            ['Value Propositions', 'Customer Segments', 'Channels', ...]
+            >>> print(smart_art.text)
+            Value Propositions
+            Customer Segments
+            Channels
+            ...
+        """
+        if not self.has_smart_art:
+            raise ValueError("shape does not contain SmartArt")
+        return self._diagram_data_part.smart_art
+
+    @property
+    def _diagram_data_part(self) -> DiagramDataPart:
+        """The |DiagramDataPart| object containing the SmartArt data for this graphic frame."""
+        diagram_data_rId = self._graphicFrame.diagram_data_rId
+        if diagram_data_rId is None:
+            raise ValueError("this graphic frame does not contain SmartArt")
+        return cast("DiagramDataPart", self.part.related_part(diagram_data_rId))
+
+    @property
     def shape_type(self) -> MSO_SHAPE_TYPE:
         """Optional member of `MSO_SHAPE_TYPE` identifying the type of this shape.
 
         Possible values are `MSO_SHAPE_TYPE.CHART`, `MSO_SHAPE_TYPE.TABLE`,
-        `MSO_SHAPE_TYPE.EMBEDDED_OLE_OBJECT`, `MSO_SHAPE_TYPE.LINKED_OLE_OBJECT`.
+        `MSO_SHAPE_TYPE.DIAGRAM` (SmartArt), `MSO_SHAPE_TYPE.EMBEDDED_OLE_OBJECT`,
+        `MSO_SHAPE_TYPE.LINKED_OLE_OBJECT`, `MSO_SHAPE_TYPE.SLIDE_ZOOM`,
+        `MSO_SHAPE_TYPE.MODEL_3D`.
 
-        This value is `None` when none of these four types apply, for example when the shape
-        contains SmartArt.
+        This value is `None` when none of these types apply.
         """
         graphicData_uri = self._graphicFrame.graphicData_uri
         if graphicData_uri == GRAPHIC_DATA_URI_CHART:
             return MSO_SHAPE_TYPE.CHART
         elif graphicData_uri == GRAPHIC_DATA_URI_TABLE:
             return MSO_SHAPE_TYPE.TABLE
+        elif graphicData_uri == GRAPHIC_DATA_URI_DIAGRAM:
+            return MSO_SHAPE_TYPE.DIAGRAM
+        elif graphicData_uri == GRAPHIC_DATA_URI_MODEL3D:
+            return MSO_SHAPE_TYPE.MODEL_3D
         elif graphicData_uri == GRAPHIC_DATA_URI_OLEOBJ:
             return (
                 MSO_SHAPE_TYPE.EMBEDDED_OLE_OBJECT
                 if self._graphicFrame.is_embedded_ole_obj
                 else MSO_SHAPE_TYPE.LINKED_OLE_OBJECT
             )
+        elif graphicData_uri == GRAPHIC_DATA_URI_SLIDE_ZOOM:
+            return MSO_SHAPE_TYPE.SLIDE_ZOOM
         else:
             return None  # pyright: ignore[reportReturnType]
 

@@ -234,6 +234,176 @@ class Slide(_BaseSlide):
         """|SlideLayout| object this slide inherits appearance from."""
         return self.part.slide_layout
 
+    @property
+    def has_transition(self) -> bool:
+        """True if this slide has a transition defined, False otherwise."""
+        return self._element.transition is not None
+
+    @property
+    def transition(self) -> "SlideTransition":
+        """Return |SlideTransition| object for this slide's transition settings.
+
+        The transition object provides access to transition type, duration, and
+        other transition properties.
+        """
+        return SlideTransition(self._element)
+
+
+class SlideTransition:
+    """Provides access to slide transition properties.
+
+    A slide transition is the visual effect that occurs when moving from one
+    slide to the next during a presentation.
+    """
+
+    def __init__(self, sld: "CT_Slide"):
+        self._sld = sld
+
+    @property
+    def type(self) -> str | None:
+        """Return the transition type name, or None if no transition.
+
+        Returns a string like "morph", "fade", "push", etc., or None if
+        no transition is set.
+        """
+        transition = self._sld.transition
+        if transition is None:
+            return None
+        # Check for morph transition
+        if transition.morph is not None:
+            return "morph"
+        # Check for other transition types by looking at children
+        for child in transition:
+            tag = child.tag
+            if "}" in tag:
+                local_name = tag.split("}")[-1]
+            else:
+                local_name = tag.split(":")[-1] if ":" in tag else tag
+            # Skip non-transition elements
+            if local_name in ("sndAc", "extLst"):
+                continue
+            return local_name
+        return None
+
+    @type.setter
+    def type(self, value: str | None) -> None:
+        """Set the transition type.
+
+        Args:
+            value: Transition type name like "morph", "fade", "push", etc.,
+                   or None to remove the transition.
+        """
+        from pptx.oxml.slide.transition import CT_SlideTransition
+
+        if value is None:
+            # Remove transition element
+            transition = self._sld.transition
+            if transition is not None:
+                self._sld.remove(transition)
+            return
+
+        if value == "morph":
+            # Use morph transition
+            self._set_morph_transition()
+        else:
+            # For other transitions, create a simple transition element
+            self._set_simple_transition(value)
+
+    def _set_morph_transition(self, option: str = "byObject", duration_ms: int = 2000) -> None:
+        """Set morph transition with specified options."""
+        from pptx.oxml.slide.transition import CT_SlideTransition
+
+        # Remove existing transition if present
+        old_transition = self._sld.transition
+        if old_transition is not None:
+            self._sld.remove(old_transition)
+
+        # Add new morph transition
+        new_transition = CT_SlideTransition.new_morph(option, duration_ms)
+        self._sld._insert_transition(new_transition)
+
+    def _set_simple_transition(self, transition_type: str) -> None:
+        """Set a simple transition type."""
+        from pptx.oxml import parse_xml
+        from pptx.oxml.ns import nsdecls
+        from pptx.oxml.slide.transition import CT_SlideTransition
+
+        # Remove existing transition if present
+        old_transition = self._sld.transition
+        if old_transition is not None:
+            self._sld.remove(old_transition)
+
+        # Create new transition with specified type
+        xml = f'<p:transition {nsdecls("p")}><p:{transition_type}/></p:transition>'
+        new_transition = parse_xml(xml)
+        self._sld._insert_transition(new_transition)
+
+    @property
+    def duration(self) -> int | None:
+        """Return the transition duration in milliseconds, or None.
+
+        Uses the p14:dur attribute if available (PowerPoint 2010+), otherwise
+        estimates based on the spd attribute.
+        """
+        transition = self._sld.transition
+        if transition is None:
+            return None
+        # Check for p14:dur first (more precise)
+        if transition.dur is not None:
+            return transition.dur
+        # Fall back to spd attribute
+        spd = transition.spd
+        if spd == "slow":
+            return 2000
+        elif spd == "med":
+            return 1000
+        elif spd == "fast":
+            return 500
+        return None
+
+    @property
+    def advance_on_click(self) -> bool:
+        """True if slide advances on mouse click."""
+        transition = self._sld.transition
+        if transition is None:
+            return True  # Default is to advance on click
+        # advClick defaults to True if not specified
+        return transition.advClick is not False
+
+    @property
+    def advance_after_ms(self) -> int | None:
+        """Return automatic advance time in milliseconds, or None.
+
+        If set, the slide will automatically advance after this many milliseconds.
+        """
+        transition = self._sld.transition
+        if transition is None:
+            return None
+        return transition.advTm
+
+    @property
+    def morph_option(self) -> str | None:
+        """Return the morph transition option, or None if not a morph transition.
+
+        Possible values: "byObject", "byWord", "byChar"
+        """
+        transition = self._sld.transition
+        if transition is None:
+            return None
+        morph = transition.morph
+        if morph is None:
+            return None
+        return morph.option or "byObject"
+
+    def set_morph(self, option: str = "byObject", duration_ms: int = 2000) -> None:
+        """Set the transition to morph with specified options.
+
+        Args:
+            option: "byObject" (default), "byWord", or "byChar"
+            duration_ms: Duration in milliseconds (default 2000)
+        """
+        self._set_morph_transition(option, duration_ms)
+
 
 class Slides(ParentedElementProxy):
     """Sequence of slides belonging to an instance of |Presentation|.

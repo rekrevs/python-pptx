@@ -17,6 +17,7 @@ from pptx.chart.series import (
     PieSeries,
     RadarSeries,
     SeriesCollection,
+    StockSeries,
     XySeries,
     _BaseCategorySeries,
     _BaseSeries,
@@ -387,6 +388,22 @@ class DescribeRadarSeries(object):
         return RadarSeries(None)
 
 
+class DescribeStockSeries(object):
+    def it_is_a_BaseCategorySeries_subclass(self, subclass_fixture):
+        stock_series = subclass_fixture
+        assert isinstance(stock_series, _BaseCategorySeries)
+
+    def it_uses__MarkerMixin(self, subclass_fixture):
+        stock_series = subclass_fixture
+        assert isinstance(stock_series, _MarkerMixin)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def subclass_fixture(self):
+        return StockSeries(None)
+
+
 class Describe_XySeries(object):
     def it_uses__MarkerMixin(self, subclass_fixture):
         line_series = subclass_fixture
@@ -541,6 +558,7 @@ class Describe_SeriesFactory(object):
             ("c:pieChart/c:ser", "PieSeries"),
             ("c:radarChart/c:ser", "RadarSeries"),
             ("c:scatterChart/c:ser", "XySeries"),
+            ("c:stockChart/c:ser", "StockSeries"),
         ]
     )
     def call_fixture(self, request):

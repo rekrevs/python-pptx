@@ -38,7 +38,8 @@ from pptx.util import Emu, lazyproperty
 if TYPE_CHECKING:
     from pptx.chart.chart import Chart
     from pptx.chart.data import ChartData
-    from pptx.enum.chart import XL_CHART_TYPE
+    from pptx.chartex.data import ChartExData
+    from pptx.enum.chart import XL_CHART_TYPE, XL_CHARTEX_TYPE
     from pptx.enum.shapes import MSO_CONNECTOR_TYPE, MSO_SHAPE
     from pptx.oxml.shapes import ShapeElement
     from pptx.oxml.shapes.connector import CT_Connector
@@ -257,6 +258,49 @@ class _BaseGroupShapes(_BaseShapes):
         self._recalculate_extents()
         return cast("Chart", self._shape_factory(graphicFrame))
 
+    def add_chartex(
+        self,
+        chart_type: "XL_CHARTEX_TYPE",
+        x: Length,
+        y: Length,
+        cx: Length,
+        cy: Length,
+        chart_data: "ChartExData",
+    ) -> GraphicFrame:
+        """Add a new ChartEx chart of `chart_type` to the slide.
+
+        ChartEx charts are Office 2016+ modern chart types including Treemap, Sunburst,
+        Waterfall, Funnel, and Box & Whisker. The chart is positioned at (`x`, `y`),
+        has size (`cx`, `cy`), and depicts `chart_data`.
+
+        `chart_type` is one of the :ref:`XL_CHARTEX_TYPE` enumeration values.
+        `chart_data` is a |ChartExData| object populated with series data.
+
+        Example::
+
+            from pptx.enum.chart import XL_CHARTEX_TYPE
+            from pptx.chartex.data import ChartExData
+            from pptx.util import Inches
+
+            data = ChartExData()
+            data.add_series("Sales", ["Q1", "Q2", "Q3", "Q4"], [100, 150, 200, 175])
+
+            chart = slide.shapes.add_chartex(
+                XL_CHARTEX_TYPE.TREEMAP,
+                Inches(1), Inches(1), Inches(6), Inches(4),
+                data
+            )
+
+        Returns the |GraphicFrame| shape containing the chart.
+        """
+        from pptx.enum.chart import XL_CHARTEX_TYPE
+
+        layout_id = XL_CHARTEX_TYPE.to_xml(chart_type)
+        rId = self.part.add_chartex_part(layout_id, chart_data)
+        graphicFrame = self._add_chartex_graphicFrame(rId, x, y, cx, cy)
+        self._recalculate_extents()
+        return cast(GraphicFrame, self._shape_factory(graphicFrame))
+
     def add_connector(
         self,
         connector_type: MSO_CONNECTOR_TYPE,
@@ -372,6 +416,60 @@ class _BaseGroupShapes(_BaseShapes):
         self._recalculate_extents()
         return cast(Picture, self._shape_factory(pic))
 
+    def add_svg_picture(
+        self,
+        svg_file: str | IO[bytes],
+        fallback_file: str | IO[bytes],
+        left: Length,
+        top: Length,
+        width: Length | None = None,
+        height: Length | None = None,
+    ) -> Picture:
+        """Add SVG picture shape with PNG/fallback image.
+
+        `svg_file` is the SVG image (path or file-like object).
+        `fallback_file` is a PNG/JPEG/etc. image for older PowerPoint versions.
+
+        Modern PowerPoint (2016+) will display the SVG, while older versions
+        will display the fallback image. Both files must be provided.
+
+        The picture is positioned with its top-left corner at (`left`, `top`).
+        If `width` and `height` are both |None|, the native size of the fallback
+        image is used. If only one of `width` or `height` is used, the unspecified
+        dimension is calculated to preserve the aspect ratio. If both are specified,
+        the picture is stretched to fit.
+
+        Example::
+
+            from pptx import Presentation
+            from pptx.util import Inches
+
+            prs = Presentation()
+            slide = prs.slides.add_slide(prs.slide_layouts[6])
+            slide.shapes.add_svg_picture(
+                'logo.svg',
+                'logo.png',
+                Inches(1), Inches(1),
+                Inches(3), Inches(2)
+            )
+            prs.save('presentation.pptx')
+        """
+        # Add both image parts
+        svg_part, svg_rId = self.part.get_or_add_image_part(svg_file)
+        fallback_part, fallback_rId = self.part.get_or_add_image_part(fallback_file)
+
+        # Use fallback image for sizing (it's a raster image with known dimensions)
+        id_ = self._next_shape_id
+        scaled_cx, scaled_cy = fallback_part.scale(width, height)
+        name = "Picture %d" % (id_ - 1)
+        desc = svg_part.desc
+
+        pic = self._grpSp.add_svg_pic(
+            id_, name, desc, fallback_rId, svg_rId, left, top, scaled_cx, scaled_cy
+        )
+        self._recalculate_extents()
+        return cast(Picture, self._shape_factory(pic))
+
     def add_shape(
         self, autoshape_type_id: MSO_SHAPE, left: Length, top: Length, width: Length, height: Length
     ) -> Shape:
@@ -437,6 +535,22 @@ class _BaseGroupShapes(_BaseShapes):
         shape_id = self._next_shape_id
         name = "Chart %d" % (shape_id - 1)
         graphicFrame = CT_GraphicalObjectFrame.new_chart_graphicFrame(
+            shape_id, name, rId, x, y, cx, cy
+        )
+        self._spTree.append(graphicFrame)
+        return graphicFrame
+
+    def _add_chartex_graphicFrame(
+        self, rId: str, x: Length, y: Length, cx: Length, cy: Length
+    ) -> CT_GraphicalObjectFrame:
+        """Return new `p:graphicFrame` element appended to this shape tree.
+
+        The `p:graphicFrame` element has the specified position and size and refers to the
+        ChartEx part identified by `rId`.
+        """
+        shape_id = self._next_shape_id
+        name = "Chart %d" % (shape_id - 1)
+        graphicFrame = CT_GraphicalObjectFrame.new_chartex_graphicFrame(
             shape_id, name, rId, x, y, cx, cy
         )
         self._spTree.append(graphicFrame)

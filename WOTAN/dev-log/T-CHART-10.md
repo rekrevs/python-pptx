@@ -1,0 +1,161 @@
+# Task T-CHART-10
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-CHART-10 |
+| Parent | B-CHART-03, B-CHART-04, B-CHART-05, B-CHART-06, B-CHART-08 |
+| State | DONE |
+| Created | 2024-12-03 |
+| Updated | 2024-12-03 |
+
+## Objective
+
+Add public API for creating ChartEx charts (Treemap, Sunburst, Waterfall, Funnel, Box & Whisker) via `shapes.add_chartex()` method.
+
+## Acceptance Criteria
+
+- [x] `XL_CHARTEX_TYPE` enum for chart types
+- [x] `CT_ChartExChart.rId` attribute and `new_chart()` method
+- [x] `CT_GraphicalObjectFrame.new_chartex_graphicFrame()` method
+- [x] `SlidePart.add_chartex_part()` method
+- [x] `SlideShapes.add_chartex()` method (on `_BaseGroupShapes`)
+- [x] All 5 chart types work end-to-end
+- [x] All existing tests pass (2711 unit, 973 acceptance)
+
+## Context
+
+This task adds the public API for ChartEx charts, building on the infrastructure created in T-CHART-09. The API follows the same pattern as `add_chart()` for traditional charts.
+
+## Implementation
+
+### Files Modified
+
+- `src/pptx/enum/chart.py` - Added `XL_CHARTEX_TYPE` enum
+- `src/pptx/oxml/chartex/chartex.py` - Added `rId` attribute and `new_chart()` to `CT_ChartExChart`
+- `src/pptx/oxml/shapes/graphfrm.py` - Added `new_chartex_graphicFrame()` method
+- `src/pptx/parts/slide.py` - Added `add_chartex_part()` method
+- `src/pptx/parts/chartex.py` - Fixed `xlsx_part` getter to handle missing relationships
+- `src/pptx/shapes/shapetree.py` - Added `add_chartex()` and `_add_chartex_graphicFrame()` methods
+- `src/pptx/spec.py` - Added `GRAPHIC_DATA_URI_CHARTEX` constant
+
+### XL_CHARTEX_TYPE Enum
+
+```python
+class XL_CHARTEX_TYPE(BaseXmlEnum):
+    TREEMAP = (1, "treemap", "Treemap chart")
+    SUNBURST = (2, "sunburst", "Sunburst chart")
+    WATERFALL = (3, "waterfall", "Waterfall chart")
+    FUNNEL = (4, "funnel", "Funnel chart")
+    BOX_AND_WHISKER = (5, "boxWhisker", "Box & Whisker chart")
+```
+
+### Public API
+
+```python
+from pptx.enum.chart import XL_CHARTEX_TYPE
+from pptx.chartex.data import ChartExData
+from pptx.util import Inches
+
+# Create chart data
+data = ChartExData()
+data.add_series("Sales", ["Q1", "Q2", "Q3", "Q4"], [100, 150, 200, 175])
+
+# For Waterfall charts, mark subtotals
+# series.set_subtotals([3])
+
+# Add chart to slide
+chart = slide.shapes.add_chartex(
+    XL_CHARTEX_TYPE.TREEMAP,  # or SUNBURST, WATERFALL, FUNNEL, BOX_AND_WHISKER
+    Inches(1), Inches(1),
+    Inches(6), Inches(4),
+    data
+)
+```
+
+## Evidence
+
+### Unit tests pass
+
+```
+$ pytest tests/ -q
+2711 passed in 3.36s
+```
+
+### Acceptance tests pass
+
+```
+$ behave features/ -q
+54 features passed, 0 failed, 0 skipped
+973 scenarios passed, 0 failed, 0 skipped
+2914 steps passed, 0 failed, 0 skipped
+```
+
+### All 5 chart types work
+
+```python
+# All 5 chart types created successfully:
+Treemap: Created shape id=2
+Sunburst: Created shape id=2
+Waterfall: Created shape id=2
+Funnel: Created shape id=2
+Box & Whisker: Created shape id=2
+
+# PPTX contains 5 chartEx parts
+ChartEx parts created: 5
+```
+
+### Generated XML Structure
+
+```xml
+<!-- chartEx1.xml -->
+<cx:chartSpace xmlns:cx="..." xmlns:r="...">
+  <cx:chartData>
+    <cx:externalData r:id="rId1" cx:autoUpdate="0"/>
+    <cx:data id="0">
+      <cx:strDim type="cat">
+        <cx:f>Sheet1!$A$2:$A$5</cx:f>
+        <cx:lvl ptCount="4">
+          <cx:pt idx="0">Q1</cx:pt>
+          ...
+        </cx:lvl>
+      </cx:strDim>
+      <cx:numDim type="size">
+        <cx:f>Sheet1!$B$2:$B$5</cx:f>
+        <cx:lvl ptCount="4" formatCode="General">
+          <cx:pt idx="0">100</cx:pt>
+          ...
+        </cx:lvl>
+      </cx:numDim>
+    </cx:data>
+  </cx:chartData>
+  <cx:chart>
+    <cx:plotArea>
+      <cx:plotAreaRegion>
+        <cx:series layoutId="treemap" uniqueId="{...}">
+          <cx:tx>...</cx:tx>
+          <cx:dataId val="0"/>
+          <cx:layoutPr>
+            <cx:parentLabelLayout val="overlapping"/>
+          </cx:layoutPr>
+        </cx:series>
+      </cx:plotAreaRegion>
+    </cx:plotArea>
+  </cx:chart>
+</cx:chartSpace>
+```
+
+## Outcome
+
+**State**: DONE
+
+All Phase 2 ready ChartEx charts are now implemented:
+- B-CHART-03: Treemap charts - DONE
+- B-CHART-04: Sunburst charts - DONE
+- B-CHART-05: Waterfall charts - DONE
+- B-CHART-06: Funnel charts - DONE
+- B-CHART-08: Box & Whisker charts - DONE
+
+Remaining Phase 2 work:
+- B-CHART-07: Map charts - NEEDS-SPEC (requires sample file for XML analysis)
