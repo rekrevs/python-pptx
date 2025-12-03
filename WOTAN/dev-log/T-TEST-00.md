@@ -1,0 +1,101 @@
+# Task T-TEST-00
+
+## Header
+
+| Field | Value |
+|-------|-------|
+| ID | T-TEST-00 |
+| Parent | B-TEST-00 |
+| State | DONE |
+| Created | 2024-12-03 |
+| Completed | 2024-12-03 |
+
+## Objective
+
+Verify current python-pptx functionality and establish a baseline before making any changes. Thoroughly test that the library does what it's supposed to do.
+
+## Acceptance Criteria
+
+- [x] All existing tests run and results documented
+- [x] Test files in `tests/test_files/` examined and catalogued
+- [x] Example documents in `WOTAN/example-docs/` tested for round-trip
+- [x] Current state documented with specific pass/fail for each feature area
+- [x] Any regressions or bugs identified and catalogued
+- [x] Baseline report created
+
+## Context
+
+- Existing tests: `tests/` (pytest), `features/` (behave)
+- Test fixtures: `tests/test_files/`
+- Example docs: `WOTAN/example-docs/`
+- Current state analysis: `WOTAN/docs/current-state.md`
+
+## Subtasks
+
+| ID | Description | State |
+|----|-------------|-------|
+| T-TEST-00-1 | Run existing test suites | DONE |
+| T-TEST-00-2 | Catalogue test files | DONE |
+| T-TEST-00-3 | Test example documents | DONE |
+| T-TEST-00-4 | Create baseline report | DONE |
+
+## Implementation Notes
+
+### Approach
+
+1. First run pytest and behave to get current test status
+2. Explore test_files to understand what's being tested
+3. Test example documents for read/write round-trip
+4. Compile findings into baseline report
+
+## Obstacles
+
+None encountered.
+
+## Evidence
+
+### Test Suite Results
+
+**pytest (unit tests)**:
+```
+pytest tests/ --tb=no -q
+2700 passed in 3.01s
+```
+
+**behave (acceptance tests)**:
+```
+54 features passed, 0 failed, 0 skipped
+973 scenarios passed, 0 failed, 0 skipped
+2914 steps passed, 0 failed, 0 skipped
+Took 0min 1.670s
+```
+
+### Example Document Round-Trip
+
+| File | Slides | Status | Size Change |
+|------|--------|--------|-------------|
+| `2023-03-17-mogren...` | 10 | PASS | -0.0% |
+| `AI at RISE 2024-05-21.pptx` | 22 | PASS | -0.1% |
+| `ErdzanHodzic.pptx` | 1 | PASS | -0.7% |
+
+All three documents opened, analyzed, and saved successfully. All XML namespaces (including modern p14, p15, a16, dgm) preserved through round-trip.
+
+### Regressions Identified
+
+**None.** All documented functionality works as expected.
+
+### Output
+
+Full baseline report created at: `WOTAN/docs/baseline-report.md`
+
+## Outcome
+
+**State**: DONE
+
+All acceptance criteria met. python-pptx v1.0.2 is fully functional with:
+- 100% test pass rate (2,700 unit tests + 973 acceptance scenarios)
+- Successful round-trip of 3 real-world presentations
+- Preservation of modern XML namespaces
+- No regressions identified
+
+The library is ready for extension work.
