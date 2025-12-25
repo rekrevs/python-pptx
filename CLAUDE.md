@@ -25,7 +25,7 @@ behave features/
 
 - Python 3.8+, lxml, Pillow, XlsxWriter
 - Testing: pytest, behave (BDD)
-- Quality: pyright (strict), ruff
+- Quality: pyright, ruff (advisory only - see below)
 
 ## Architecture
 
@@ -65,14 +65,14 @@ wotan/:
 ## Commands
 
 ```bash
-# Testing
+# Testing (required - must pass)
 pytest tests/ -q                    # Unit tests
 behave features/                    # Acceptance tests
 pytest tests/ -q && behave          # Full suite
 
-# Quality
-pyright                             # Type checking
-ruff check                          # Linting
+# Quality (advisory - not enforced in CI)
+pyright                             # Type checking (~3900 pre-existing errors)
+ruff check                          # Linting (~117 pre-existing warnings)
 
 # Task management
 /wotan                              # Show active tasks
@@ -116,5 +116,10 @@ See `wotan/docs/` for specifications.
 
 Before completing work:
 ```bash
-pytest tests/ -q && behave features/ && pyright && ruff check
+pytest tests/ -q && behave features/
 ```
+
+Note: `pyright` and `ruff check` are configured in `pyproject.toml` but have
+many pre-existing errors from the upstream codebase. They are not run in CI
+(`.github/workflows/ci.yml` only runs pytest + behave). Don't introduce new
+errors, but fixing existing ones is out of scope unless specifically requested.
