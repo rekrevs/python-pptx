@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "next_id": 16,
+  "tasks": [
+    {"id": "T-0001", "status": "DONE", "summary": "Baseline verification"},
+    {"id": "T-0002", "status": "DONE", "summary": "Version compatibility research"},
+    {"id": "T-0003", "status": "DONE", "summary": "Create test PPTX files"},
+    {"id": "T-0004", "status": "DONE", "summary": "SVG image support"},
+    {"id": "T-0005", "status": "DONE", "summary": "SmartArt read support"},
+    {"id": "T-0006", "status": "DONE", "summary": "Bezier freeform shapes"},
+    {"id": "T-0007", "status": "DONE", "summary": "Additional shape features"},
+    {"id": "T-0008", "status": "DONE", "summary": "Media type detection"},
+    {"id": "T-0009", "status": "DONE", "summary": "API documentation update"},
+    {"id": "T-0010", "status": "READY", "summary": "Stock charts (XML writer incomplete)"},
+    {"id": "T-0011", "status": "READY", "summary": "Surface charts (XML writer incomplete)"},
+    {"id": "T-0012", "status": "DONE", "summary": "ChartEx infrastructure"},
+    {"id": "T-0013", "status": "DONE", "summary": "ChartEx public API"},
+    {"id": "T-0014", "status": "DONE", "summary": "Treemap charts"},
+    {"id": "T-0015", "status": "DONE", "summary": "Sunburst charts"}
+  ]
+}
