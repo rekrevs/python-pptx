@@ -230,6 +230,18 @@ class StockPlot(_BasePlot):
     """
 
 
+class SurfacePlot(_BasePlot):
+    """A surface chart plot.
+
+    Surface charts display 3D surface data with categories on one axis,
+    series on another, and values on the vertical axis. Variants include:
+    - SURFACE: 3D surface with color bands
+    - SURFACE_WIREFRAME: 3D wireframe without fill
+    - SURFACE_TOP_VIEW: 2D contour view
+    - SURFACE_TOP_VIEW_WIREFRAME: 2D wireframe contour
+    """
+
+
 class XyPlot(_BasePlot):
     """
     An XY (scatter) plot.
@@ -253,6 +265,8 @@ def PlotFactory(xChart, chart):
             qn("c:radarChart"): RadarPlot,
             qn("c:scatterChart"): XyPlot,
             qn("c:stockChart"): StockPlot,
+            qn("c:surfaceChart"): SurfacePlot,
+            qn("c:surface3DChart"): SurfacePlot,
         }[xChart.tag]
     except KeyError:
         raise ValueError("unsupported plot type %s" % xChart.tag)
@@ -283,6 +297,7 @@ class PlotTypeInspector(object):
                 "PiePlot": cls._differentiate_pie_chart_type,
                 "RadarPlot": cls._differentiate_radar_chart_type,
                 "StockPlot": cls._differentiate_stock_chart_type,
+                "SurfacePlot": cls._differentiate_surface_chart_type,
                 "XyPlot": cls._differentiate_xy_chart_type,
             }[plot.__class__.__name__]
         except KeyError:
@@ -412,6 +427,28 @@ class PlotTypeInspector(object):
             return XL.STOCK_OHLC
         # Default to HLC for 3 series or any other count
         return XL.STOCK_HLC
+
+    @classmethod
+    def _differentiate_surface_chart_type(cls, plot):
+        """Differentiate between surface chart variants.
+
+        Surface charts come in four variants based on two factors:
+        - 3D vs 2D (surfaceChart uses surface3DChart, top-view uses surfaceChart)
+        - Filled vs Wireframe (wireframe element val attribute)
+
+        The element type determines the projection:
+        - c:surface3DChart: 3D view (SURFACE or SURFACE_WIREFRAME)
+        - c:surfaceChart: Top view / contour (SURFACE_TOP_VIEW or SURFACE_TOP_VIEW_WIREFRAME)
+        """
+        surfaceChart = plot._element
+        is_3d = surfaceChart.tag == qn("c:surface3DChart")
+        wireframe = surfaceChart.xpath("c:wireframe/@val")
+        is_wireframe = wireframe and wireframe[0] == "1"
+
+        if is_3d:
+            return XL.SURFACE_WIREFRAME if is_wireframe else XL.SURFACE
+        else:
+            return XL.SURFACE_TOP_VIEW_WIREFRAME if is_wireframe else XL.SURFACE_TOP_VIEW
 
     @classmethod
     def _differentiate_xy_chart_type(cls, plot):

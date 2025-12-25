@@ -159,6 +159,22 @@ Feature: Access a shape on a slide
       | Stock OHLC   | STOCK_OHLC |   4  |
 
 
+  Scenario Outline: SlideShapes.add_chart() (surface chart)
+    Given a blank slide
+     When I add a <type> chart with 3 categories and 3 series
+     Then chart.chart_type is <chart-type>
+      And len(plot.categories) is 3
+      And len(chart.series) is 3
+      And the chart has an Excel data worksheet
+
+    Examples: Surface chart types
+      | type                      | chart-type               |
+      | Surface                   | SURFACE                  |
+      | Surface Wireframe         | SURFACE_WIREFRAME        |
+      | Surface Top View          | SURFACE_TOP_VIEW         |
+      | Surface Top View Wireframe | SURFACE_TOP_VIEW_WIREFRAME |
+
+
   Scenario Outline: SlideShapes.add_chart() (category chart with date axis)
     Given a SlideShapes object as shapes
       And a CategoryChartData object having date categories

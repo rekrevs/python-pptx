@@ -33,6 +33,7 @@ from pptx.chart.xmlwriter import (
     _PieChartXmlWriter,
     _RadarChartXmlWriter,
     _StockChartXmlWriter,
+    _SurfaceChartXmlWriter,
     _XyChartXmlWriter,
     _XySeriesXmlRewriter,
     _XySeriesXmlWriter,
@@ -83,6 +84,10 @@ class DescribeChartXmlWriter(object):
             ("RADAR_MARKERS", _RadarChartXmlWriter),
             ("STOCK_HLC", _StockChartXmlWriter),
             ("STOCK_OHLC", _StockChartXmlWriter),
+            ("SURFACE", _SurfaceChartXmlWriter),
+            ("SURFACE_TOP_VIEW", _SurfaceChartXmlWriter),
+            ("SURFACE_TOP_VIEW_WIREFRAME", _SurfaceChartXmlWriter),
+            ("SURFACE_WIREFRAME", _SurfaceChartXmlWriter),
             ("XY_SCATTER", _XyChartXmlWriter),
             ("XY_SCATTER_LINES", _XyChartXmlWriter),
             ("XY_SCATTER_LINES_NO_MARKERS", _XyChartXmlWriter),
@@ -325,6 +330,26 @@ class Describe_StockChartXmlWriter(object):
         xml_writer = _StockChartXmlWriter(XL_CHART_TYPE.STOCK_OHLC, chart_data)
 
         assert xml_writer.xml == snippet_text("2x4-stock-ohlc")
+
+
+class Describe_SurfaceChartXmlWriter(object):
+    """Unit-test suite for `pptx.chart.xmlwriter._SurfaceChartXmlWriter`."""
+
+    @pytest.mark.parametrize(
+        ("enum_member", "snippet_name"),
+        [
+            ("SURFACE", "3x3-surface"),
+            ("SURFACE_WIREFRAME", "3x3-surface-wireframe"),
+            ("SURFACE_TOP_VIEW", "3x3-surface-top-view"),
+            ("SURFACE_TOP_VIEW_WIREFRAME", "3x3-surface-top-view-wireframe"),
+        ],
+    )
+    def it_can_generate_xml_for_surface_charts(self, enum_member, snippet_name):
+        chart_type = getattr(XL_CHART_TYPE, enum_member)
+        chart_data = make_surface_chart_data(cat_count=3, ser_count=3)
+        xml_writer = _SurfaceChartXmlWriter(chart_type, chart_data)
+
+        assert xml_writer.xml == snippet_text(snippet_name)
 
 
 class Describe_XyChartXmlWriter(object):
@@ -737,6 +762,32 @@ def make_stock_chart_data(cat_count, is_ohlc):
     chart_data.add_series("High", (25.0, 28.0)[:cat_count])
     chart_data.add_series("Low", (20.0, 22.0)[:cat_count])
     chart_data.add_series("Close", (23.0, 26.0)[:cat_count])
+
+    return chart_data
+
+
+def make_surface_chart_data(cat_count, ser_count):
+    """
+    Return a |CategoryChartData| object populated for surface chart testing.
+
+    Surface charts need 3D data: categories (X), series (Y), values (Z).
+    """
+    chart_data = CategoryChartData()
+    categories = ["Row 1", "Row 2", "Row 3", "Row 4", "Row 5"]
+    chart_data.categories = categories[:cat_count]
+
+    # Create a simple 3D surface pattern
+    series_labels = ["Col 1", "Col 2", "Col 3", "Col 4", "Col 5"]
+    base_values = [
+        (1.0, 2.0, 1.5, 1.0, 0.5),
+        (2.0, 3.0, 2.5, 2.0, 1.5),
+        (1.5, 2.5, 2.0, 1.5, 1.0),
+        (1.0, 2.0, 1.5, 1.0, 0.5),
+        (0.5, 1.5, 1.0, 0.5, 0.0),
+    ]
+
+    for i in range(ser_count):
+        chart_data.add_series(series_labels[i], base_values[i][:cat_count])
 
     return chart_data
 

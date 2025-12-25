@@ -186,6 +186,10 @@ def when_I_add_a_chart_with_categories_and_series(context, kind, cats, sers):
         "Radar": XL_CHART_TYPE.RADAR,
         "Filled Radar": XL_CHART_TYPE.RADAR_FILLED,
         "Radar with markers": XL_CHART_TYPE.RADAR_MARKERS,
+        "Surface": XL_CHART_TYPE.SURFACE,
+        "Surface Wireframe": XL_CHART_TYPE.SURFACE_WIREFRAME,
+        "Surface Top View": XL_CHART_TYPE.SURFACE_TOP_VIEW,
+        "Surface Top View Wireframe": XL_CHART_TYPE.SURFACE_TOP_VIEW_WIREFRAME,
     }[kind]
     category_count, series_count = int(cats), int(sers)
     category_source = ("Foo", "Bar", "Baz", "Boo", "Far", "Faz")
