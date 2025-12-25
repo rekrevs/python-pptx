@@ -11,7 +11,7 @@
     {"id": "T-0007", "status": "DONE", "summary": "Additional shape features"},
     {"id": "T-0008", "status": "DONE", "summary": "Media type detection"},
     {"id": "T-0009", "status": "DONE", "summary": "API documentation update"},
-    {"id": "T-0010", "status": "READY", "summary": "Stock charts (XML writer incomplete)"},
+    {"id": "T-0010", "status": "DONE", "summary": "Stock charts (XML writer incomplete)"},
     {"id": "T-0011", "status": "READY", "summary": "Surface charts (XML writer incomplete)"},
     {"id": "T-0012", "status": "DONE", "summary": "ChartEx infrastructure"},
     {"id": "T-0013", "status": "DONE", "summary": "ChartEx public API"},

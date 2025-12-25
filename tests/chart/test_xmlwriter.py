@@ -32,6 +32,7 @@ from pptx.chart.xmlwriter import (
     _LineChartXmlWriter,
     _PieChartXmlWriter,
     _RadarChartXmlWriter,
+    _StockChartXmlWriter,
     _XyChartXmlWriter,
     _XySeriesXmlRewriter,
     _XySeriesXmlWriter,
@@ -80,6 +81,8 @@ class DescribeChartXmlWriter(object):
             ("RADAR", _RadarChartXmlWriter),
             ("RADAR_FILLED", _RadarChartXmlWriter),
             ("RADAR_MARKERS", _RadarChartXmlWriter),
+            ("STOCK_HLC", _StockChartXmlWriter),
+            ("STOCK_OHLC", _StockChartXmlWriter),
             ("XY_SCATTER", _XyChartXmlWriter),
             ("XY_SCATTER_LINES", _XyChartXmlWriter),
             ("XY_SCATTER_LINES_NO_MARKERS", _XyChartXmlWriter),
@@ -306,6 +309,22 @@ class Describe_RadarChartXmlWriter(object):
         xml_writer = _RadarChartXmlWriter(XL_CHART_TYPE.RADAR, series_data_seq)
 
         assert xml_writer.xml == snippet_text("2x5-radar")
+
+
+class Describe_StockChartXmlWriter(object):
+    """Unit-test suite for `pptx.chart.xmlwriter._StockChartXmlWriter`."""
+
+    def it_can_generate_xml_for_stock_hlc_chart(self):
+        chart_data = make_stock_chart_data(cat_count=2, is_ohlc=False)
+        xml_writer = _StockChartXmlWriter(XL_CHART_TYPE.STOCK_HLC, chart_data)
+
+        assert xml_writer.xml == snippet_text("2x3-stock-hlc")
+
+    def it_can_generate_xml_for_stock_ohlc_chart(self):
+        chart_data = make_stock_chart_data(cat_count=2, is_ohlc=True)
+        xml_writer = _StockChartXmlWriter(XL_CHART_TYPE.STOCK_OHLC, chart_data)
+
+        assert xml_writer.xml == snippet_text("2x4-stock-ohlc")
 
 
 class Describe_XyChartXmlWriter(object):
@@ -699,6 +718,26 @@ def make_category_chart_data(cat_count, cat_type, ser_count):
         series_values = tuple(islice(point_values, cat_count))
         series_values = [round(x * 10) / 10.0 for x in series_values]
         chart_data.add_series(series_title, series_values)
+    return chart_data
+
+
+def make_stock_chart_data(cat_count, is_ohlc):
+    """
+    Return a |CategoryChartData| object populated for stock chart testing.
+
+    For HLC (is_ohlc=False): 3 series (High, Low, Close)
+    For OHLC (is_ohlc=True): 4 series (Open, High, Low, Close)
+    """
+    chart_data = CategoryChartData()
+    chart_data.categories = ["Day 1", "Day 2"][:cat_count]
+
+    # Stock price data: High=25-28, Low=20-22, Close=23-26, Open=22-24
+    if is_ohlc:
+        chart_data.add_series("Open", (22.0, 24.0)[:cat_count])
+    chart_data.add_series("High", (25.0, 28.0)[:cat_count])
+    chart_data.add_series("Low", (20.0, 22.0)[:cat_count])
+    chart_data.add_series("Close", (23.0, 26.0)[:cat_count])
+
     return chart_data
 
 

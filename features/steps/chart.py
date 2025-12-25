@@ -130,6 +130,37 @@ def when_I_add_a_clustered_bar_chart_with_multi_level_categories(context):
     ).chart
 
 
+@when("I add a {kind} chart with {cats} categories")
+def when_I_add_a_stock_chart_with_categories(context, kind, cats):
+    """Add a stock chart (HLC or OHLC) with specified category count."""
+    chart_type = {
+        "Stock HLC": XL_CHART_TYPE.STOCK_HLC,
+        "Stock OHLC": XL_CHART_TYPE.STOCK_OHLC,
+    }[kind]
+    category_count = int(cats)
+    category_source = ("Day 1", "Day 2", "Day 3", "Day 4", "Day 5")
+
+    chart_data = CategoryChartData()
+    chart_data.categories = category_source[:category_count]
+
+    # Stock charts require series in specific order
+    if chart_type == XL_CHART_TYPE.STOCK_OHLC:
+        # OHLC requires 4 series: Open, High, Low, Close
+        chart_data.add_series("Open", tuple(22.0 + i for i in range(category_count)))
+        chart_data.add_series("High", tuple(25.0 + i for i in range(category_count)))
+        chart_data.add_series("Low", tuple(20.0 + i for i in range(category_count)))
+        chart_data.add_series("Close", tuple(23.0 + i for i in range(category_count)))
+    else:
+        # HLC requires 3 series: High, Low, Close
+        chart_data.add_series("High", tuple(25.0 + i for i in range(category_count)))
+        chart_data.add_series("Low", tuple(20.0 + i for i in range(category_count)))
+        chart_data.add_series("Close", tuple(23.0 + i for i in range(category_count)))
+
+    context.chart = context.slide.shapes.add_chart(
+        chart_type, Inches(1), Inches(1), Inches(8), Inches(5), chart_data
+    ).chart
+
+
 @when("I add a {kind} chart with {cats} categories and {sers} series")
 def when_I_add_a_chart_with_categories_and_series(context, kind, cats, sers):
     chart_type = {

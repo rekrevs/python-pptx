@@ -145,6 +145,20 @@ Feature: Access a shape on a slide
       | Radar with markers        | RADAR_MARKERS            |   5  |   2  |
 
 
+  Scenario Outline: SlideShapes.add_chart() (stock chart)
+    Given a blank slide
+     When I add a <type> chart with 2 categories
+     Then chart.chart_type is <chart-type>
+      And len(plot.categories) is 2
+      And len(chart.series) is <sers>
+      And the chart has an Excel data worksheet
+
+    Examples: Stock chart types
+      | type         | chart-type | sers |
+      | Stock HLC    | STOCK_HLC  |   3  |
+      | Stock OHLC   | STOCK_OHLC |   4  |
+
+
   Scenario Outline: SlideShapes.add_chart() (category chart with date axis)
     Given a SlideShapes object as shapes
       And a CategoryChartData object having date categories
