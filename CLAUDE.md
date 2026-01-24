@@ -64,7 +64,6 @@ wotan/:
 
 ## Commands
 
-```bash
 # Testing (required - must pass)
 pytest tests/ -q                    # Unit tests
 behave features/                    # Acceptance tests
@@ -73,12 +72,6 @@ pytest tests/ -q && behave          # Full suite
 # Quality (advisory - not enforced in CI)
 pyright                             # Type checking (~3900 pre-existing errors)
 ruff check                          # Linting (~117 pre-existing warnings)
-
-# Task management
-/wotan                              # Show active tasks
-/wotan add "description"            # Create task
-/wotan start                        # Execute next task
-```
 
 ## Testing
 

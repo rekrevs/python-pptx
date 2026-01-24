@@ -12,3 +12,4 @@ _scratch/
 tags
 /tests/debug.py
 .claude/settings.local.json
+.DS_Store
