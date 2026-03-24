@@ -44,6 +44,20 @@ class BaseShape(object):
             return True
         return self._element is not other._element
 
+    @property
+    def alt_text(self) -> str:
+        """Alt text of this shape.
+
+        Read/write. The `descr` attribute of the `cNvPr` element, or an empty string if not
+        present.
+        """
+        descr = self._element._nvXxPr.cNvPr.descr  # pyright: ignore[reportPrivateUsage]
+        return descr if descr is not None else ""
+
+    @alt_text.setter
+    def alt_text(self, value: str):
+        self._element._nvXxPr.cNvPr.descr = value  # pyright: ignore[reportPrivateUsage]
+
     @lazyproperty
     def click_action(self) -> ActionSetting:
         """|ActionSetting| instance providing access to click behaviors.

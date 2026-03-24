@@ -209,3 +209,38 @@ Feature: Common shape properties
       | GraphicFrame | 2978696 | 4082752 |
       | GroupShape   | 4121696 | 5454352 |
       | Connector    | 5264696 | 6825952 |
+
+
+  Scenario Outline: Get shape.alt_text
+    Given a <shape-type> object as shape
+     Then shape.alt_text == '<alt_text>'
+
+    Examples: Shape types
+      | shape-type   | alt_text         |
+      | Picture      | python-icon.jpeg |
+
+
+  Scenario Outline: Get shape.alt_text (default)
+    Given a <shape-type> object as shape
+     Then shape.alt_text is an empty string
+
+    Examples: Shape types
+      | shape-type   |
+      | Shape        |
+      | GraphicFrame |
+      | GroupShape   |
+      | Connector    |
+
+
+  Scenario Outline: Set shape.alt_text
+    Given a <shape-type> object as shape
+     When I assign '<value>' to shape.alt_text
+     Then shape.alt_text == '<expected-value>'
+
+    Examples: Expected results of changing shape.alt_text
+      | shape-type   | value                | expected-value       |
+      | Shape        | Alt for shape        | Alt for shape        |
+      | Picture      | Alt for picture      | Alt for picture      |
+      | GraphicFrame | Alt for table        | Alt for table        |
+      | GroupShape   | Alt for group        | Alt for group        |
+      | Connector    | Alt for connector    | Alt for connector    |

@@ -280,6 +280,11 @@ def when_I_assign_value_to_shape_left(context, value):
     context.shape.left = int(value)
 
 
+@when("I assign '{value}' to shape.alt_text")
+def when_I_assign_value_to_shape_alt_text(context, value):
+    context.shape.alt_text = value
+
+
 @when("I assign '{value}' to shape.name")
 def when_I_assign_value_to_shape_name(context, value):
     context.shape.name = value
@@ -514,6 +519,20 @@ def then_picture_crop_side_eq_value(context, side, value):
 def then_picture_image_is_an_Image_object(context):
     class_name = context.picture.image.__class__.__name__
     assert class_name == "Image", "picture.image is a %s object" % class_name
+
+
+@then("shape.alt_text is an empty string")
+def then_shape_alt_text_is_an_empty_string(context):
+    shape = context.shape
+    msg = "expected alt_text '', got '%s'" % shape.alt_text
+    assert shape.alt_text == "", msg
+
+
+@then("shape.alt_text == '{expected_value}'")
+def then_shape_alt_text_eq_value(context, expected_value):
+    shape = context.shape
+    msg = "expected alt_text '%s', got '%s'" % (expected_value, shape.alt_text)
+    assert shape.alt_text == expected_value, msg
 
 
 @then("shape.adjustments[0] is 0.15")

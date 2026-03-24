@@ -47,6 +47,64 @@ if TYPE_CHECKING:
 class DescribeBaseShape(object):
     """Unit-test suite for `pptx.shapes.base.BaseShape` objects."""
 
+    @pytest.mark.parametrize(
+        ("shape_cxml", "expected_value"),
+        [
+            ("p:sp/p:nvSpPr/p:cNvPr{id=1,name=sp}", ""),
+            ("p:sp/p:nvSpPr/p:cNvPr{id=1,name=sp,descr=Alt Text}", "Alt Text"),
+            ("p:pic/p:nvPicPr/p:cNvPr{id=2,name=pic}", ""),
+            ("p:pic/p:nvPicPr/p:cNvPr{id=2,name=pic,descr=Photo of cat}", "Photo of cat"),
+            ("p:grpSp/p:nvGrpSpPr/p:cNvPr{id=3,name=grp}", ""),
+            ("p:graphicFrame/p:nvGraphicFramePr/p:cNvPr{id=4,name=gf}", ""),
+            ("p:cxnSp/p:nvCxnSpPr/p:cNvPr{id=5,name=cn}", ""),
+        ],
+    )
+    def it_knows_its_alt_text(self, shape_cxml: str, expected_value: str):
+        shape = BaseShape(element(shape_cxml), None)
+        assert shape.alt_text == expected_value
+
+    @pytest.mark.parametrize(
+        ("shape_cxml", "ShapeCls", "new_value", "expected_cxml"),
+        [
+            (
+                "p:sp/p:nvSpPr/p:cNvPr{id=1,name=sp}",
+                Shape,
+                "New alt text",
+                "p:sp/p:nvSpPr/p:cNvPr{id=1,name=sp,descr=New alt text}",
+            ),
+            (
+                "p:pic/p:nvPicPr/p:cNvPr{id=2,name=pic}",
+                Picture,
+                "Photo description",
+                "p:pic/p:nvPicPr/p:cNvPr{id=2,name=pic,descr=Photo description}",
+            ),
+            (
+                "p:grpSp/p:nvGrpSpPr/p:cNvPr{id=3,name=grp}",
+                BaseShape,
+                "Group alt",
+                "p:grpSp/p:nvGrpSpPr/p:cNvPr{id=3,name=grp,descr=Group alt}",
+            ),
+            (
+                "p:graphicFrame/p:nvGraphicFramePr/p:cNvPr{id=4,name=gf}",
+                GraphicFrame,
+                "Table alt",
+                "p:graphicFrame/p:nvGraphicFramePr/p:cNvPr{id=4,name=gf,descr=Table alt}",
+            ),
+            (
+                "p:cxnSp/p:nvCxnSpPr/p:cNvPr{id=5,name=cn}",
+                BaseShape,
+                "Connector alt",
+                "p:cxnSp/p:nvCxnSpPr/p:cNvPr{id=5,name=cn,descr=Connector alt}",
+            ),
+        ],
+    )
+    def it_can_change_its_alt_text(
+        self, shape_cxml: str, ShapeCls: type, new_value: str, expected_cxml: str
+    ):
+        shape = ShapeCls(element(shape_cxml), None)
+        shape.alt_text = new_value
+        assert shape._element.xml == xml(expected_cxml)
+
     def it_provides_access_to_its_click_action(self, click_action_fixture):
         shape, ActionSetting_, cNvPr, click_action_ = click_action_fixture
         click_action = shape.click_action
