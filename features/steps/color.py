@@ -37,6 +37,11 @@ def when_I_assign_0_42_to_color_brightness(context):
     context.color.brightness = 0.42
 
 
+@when("I assign {value} to color.alpha")
+def when_I_assign_value_to_color_alpha(context, value):
+    context.color.alpha = float(value)
+
+
 # then =====================================================
 
 
@@ -57,6 +62,16 @@ def then_color_rgb_is_RGBColor_12_34_56(context):
     assert rgb == expected_value, "expected %s, got %s" % (
         repr(expected_value),
         repr(rgb),
+    )
+
+
+@then("color.alpha is {value}")
+def then_color_alpha_is_value(context, value):
+    alpha = context.color.alpha
+    expected_value = float(value)
+    assert alpha == expected_value, "expected %s, got %s" % (
+        expected_value,
+        alpha,
     )
 
 

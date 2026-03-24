@@ -8,7 +8,7 @@ from pptx.enum.dml import MSO_THEME_COLOR
 from pptx.oxml.dml.color import CT_Percentage, CT_SchemeColor, CT_SRgbColor
 from pptx.oxml.ns import qn
 
-from .unitdata.dml import a_lumMod, a_lumOff, a_schemeClr, an_srgbClr
+from .unitdata.dml import a_lumMod, a_lumOff, a_schemeClr, an_alpha, an_srgbClr
 
 
 class Describe_BaseColorElement(object):
@@ -42,7 +42,28 @@ class Describe_BaseColorElement(object):
         assert schemeClr.xml == schemeClr_with_lumOff_xml
         assert schemeClr.find(qn("a:lumOff")) == lumOff
 
+    def it_can_get_the_alpha_child_element_if_there_is_one(
+        self, schemeClr, schemeClr_with_alpha, alpha_elm
+    ):
+        assert schemeClr.alpha is None
+        assert schemeClr_with_alpha.alpha is alpha_elm
+
+    def it_can_add_an_alpha_child_element(self, schemeClr, schemeClr_with_alpha_xml):
+        alpha = schemeClr.add_alpha(0.5)
+        assert schemeClr.xml == schemeClr_with_alpha_xml
+        assert schemeClr.find(qn("a:alpha")) == alpha
+
+    def it_can_remove_an_existing_alpha_child_element(
+        self, schemeClr_with_alpha, schemeClr_xml
+    ):
+        schemeClr_with_alpha.clear_alpha()
+        assert schemeClr_with_alpha.xml == schemeClr_xml
+
     # fixtures ---------------------------------------------
+
+    @pytest.fixture
+    def alpha_elm(self):
+        return an_alpha().with_nsdecls().element
 
     @pytest.fixture
     def lumMod(self):
@@ -59,6 +80,17 @@ class Describe_BaseColorElement(object):
     @pytest.fixture
     def schemeClr_xml(self):
         return a_schemeClr().with_nsdecls().xml()
+
+    @pytest.fixture
+    def schemeClr_with_alpha(self, alpha_elm):
+        schemeClr = a_schemeClr().with_nsdecls().element
+        schemeClr.append(alpha_elm)
+        return schemeClr
+
+    @pytest.fixture
+    def schemeClr_with_alpha_xml(self):
+        alpha_bldr = an_alpha().with_val(50000)
+        return a_schemeClr().with_nsdecls().with_child(alpha_bldr).xml()
 
     @pytest.fixture
     def schemeClr_with_lumMod(self, lumMod):
@@ -84,6 +116,9 @@ class Describe_BaseColorElement(object):
 
 
 class DescribeCT_Percentage(object):
+    def it_is_used_by_the_parser_for_an_alpha_element(self, alpha_elm):
+        assert isinstance(alpha_elm, CT_Percentage)
+
     def it_is_used_by_the_parser_for_a_lumOff_element(self, lumOff):
         assert isinstance(lumOff, CT_Percentage)
 
@@ -94,6 +129,10 @@ class DescribeCT_Percentage(object):
         assert ct_percentage.val == 0.99999
 
     # fixtures ---------------------------------------------
+
+    @pytest.fixture
+    def alpha_elm(self):
+        return an_alpha().with_nsdecls().with_val("50000").element
 
     @pytest.fixture
     def ct_percentage(self):

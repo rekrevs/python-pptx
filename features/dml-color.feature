@@ -20,3 +20,14 @@ Feature: Control color
     Given a ColorFormat object as color
      When I assign 0.42 to color.brightness
      Then color.brightness is 0.42
+
+
+  Scenario: ColorFormat.alpha
+    Given a ColorFormat object as color
+     When I assign 0.5 to color.alpha
+     Then color.alpha is 0.5
+
+
+  Scenario: ColorFormat.alpha default
+    Given a ColorFormat object as color
+     Then color.alpha is 1.0

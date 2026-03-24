@@ -14,6 +14,7 @@ from ..oxml.unitdata.dml import (
     a_schemeClr,
     a_solidFill,
     a_sysClr,
+    an_alpha,
     an_hslClr,
     an_scrgbClr,
     an_srgbClr,
@@ -21,6 +22,31 @@ from ..oxml.unitdata.dml import (
 
 
 class DescribeColorFormat(object):
+    def it_knows_its_alpha_value(self, color_format_with_alpha):
+        color_format, expected_alpha = color_format_with_alpha
+        assert color_format.alpha == expected_alpha
+
+    def it_can_set_its_alpha_value(self, set_alpha_fixture_):
+        color_format, alpha, expected_xml = set_alpha_fixture_
+        color_format.alpha = alpha
+        assert color_format._xFill.xml == expected_xml
+
+    def it_raises_on_attempt_to_set_alpha_out_of_range(self, rgb_color_format):
+        with pytest.raises(ValueError):
+            rgb_color_format.alpha = 1.1
+        with pytest.raises(ValueError):
+            rgb_color_format.alpha = -0.1
+
+    def it_raises_on_attempt_to_set_alpha_on_None_color_type(
+        self, color_format_having_none_color_type
+    ):
+        color_format = color_format_having_none_color_type
+        with pytest.raises(ValueError):
+            color_format.alpha = 0.5
+
+    def it_returns_default_alpha_for_NoneColor(self, color_format_having_none_color_type):
+        assert color_format_having_none_color_type.alpha == 1.0
+
     def it_knows_the_type_of_its_color(self, color_type_fixture_):
         color_format, color_type = color_type_fixture_
         assert color_format.type == color_type
@@ -86,6 +112,54 @@ class DescribeColorFormat(object):
         solidFill = a_solidFill().with_nsdecls().element
         color_format = ColorFormat.from_colorchoice_parent(solidFill)
         return color_format
+
+    @pytest.fixture(params=["no_alpha", "with_alpha", "none_color"])
+    def color_format_with_alpha(self, request):
+        mapping = {
+            "no_alpha": (an_srgbClr, None, 1.0),
+            "with_alpha": (an_srgbClr, 50000, 0.5),
+            "none_color": (None, None, 1.0),
+        }
+        xClr_bldr_fn, alpha_val, exp_alpha = mapping[request.param]
+        solidFill_bldr = a_solidFill().with_nsdecls()
+        if xClr_bldr_fn is not None:
+            xClr_bldr = xClr_bldr_fn()
+            if alpha_val is not None:
+                xClr_bldr.with_child(an_alpha().with_val(alpha_val))
+            solidFill_bldr.with_child(xClr_bldr)
+        solidFill = solidFill_bldr.element
+        color_format = ColorFormat.from_colorchoice_parent(solidFill)
+        return color_format, exp_alpha
+
+    @pytest.fixture(
+        params=[
+            "1.0 removes alpha",
+            "0.5 adds alpha",
+            "0.0 adds alpha",
+            "replace existing",
+        ]
+    )
+    def set_alpha_fixture_(self, request):
+        mapping = {
+            "1.0 removes alpha": (an_srgbClr, 50000, 1.0, None),
+            "0.5 adds alpha": (an_srgbClr, None, 0.5, 50000),
+            "0.0 adds alpha": (a_schemeClr, None, 0.0, 0),
+            "replace existing": (an_srgbClr, 75000, 0.25, 25000),
+        }
+        xClr_bldr_fn, alpha_in, alpha_val, alpha_out = mapping[request.param]
+
+        xClr_bldr = xClr_bldr_fn()
+        if alpha_in is not None:
+            xClr_bldr.with_child(an_alpha().with_val(alpha_in))
+        solidFill = a_solidFill().with_nsdecls().with_child(xClr_bldr).element
+        color_format = ColorFormat.from_colorchoice_parent(solidFill)
+
+        xClr_bldr = xClr_bldr_fn()
+        if alpha_out is not None:
+            xClr_bldr.with_child(an_alpha().with_val(alpha_out))
+        expected_xml = a_solidFill().with_nsdecls().with_child(xClr_bldr).xml()
+
+        return color_format, alpha_val, expected_xml
 
     @pytest.fixture(params=["hsl", "prst", "scheme", "scrgb", "srgb", "sys"])
     def color_format_with_brightness(self, request):

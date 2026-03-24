@@ -25,6 +25,19 @@ class ColorFormat(object):
         self._color = color
 
     @property
+    def alpha(self):
+        """Read/write float value between 0.0 and 1.0 indicating opacity.
+
+        1.0 is fully opaque (default), 0.0 is fully transparent.
+        """
+        return self._color.alpha
+
+    @alpha.setter
+    def alpha(self, value):
+        self._validate_alpha_value(value)
+        self._color.alpha = value
+
+    @property
     def brightness(self):
         """
         Read/write float value between -1.0 and 1.0 indicating the brightness
@@ -96,6 +109,15 @@ class ColorFormat(object):
         """
         return self._color.color_type
 
+    def _validate_alpha_value(self, value):
+        if value < 0.0 or value > 1.0:
+            raise ValueError("alpha must be number in range 0.0 to 1.0")
+        if isinstance(self._color, _NoneColor):
+            raise ValueError(
+                "can't set alpha when color.type is None. Set color.rgb"
+                " or .theme_color first."
+            )
+
     def _validate_brightness_value(self, value):
         if value < -1.0 or value > 1.0:
             raise ValueError("brightness must be number in range -1.0 to 1.0")
@@ -128,6 +150,23 @@ class _Color(object):
     def __init__(self, xClr):
         super(_Color, self).__init__()
         self._xClr = xClr
+
+    @property
+    def alpha(self):
+        """Float value between 0.0 and 1.0 representing opacity (1.0 = fully opaque).
+
+        Returns 1.0 when no alpha element is present.
+        """
+        alpha_elm = self._xClr.alpha
+        if alpha_elm is None:
+            return 1.0
+        return alpha_elm.val
+
+    @alpha.setter
+    def alpha(self, value):
+        self._xClr.clear_alpha()
+        if value < 1.0:
+            self._xClr.add_alpha(value)
 
     @property
     def brightness(self):
@@ -193,6 +232,11 @@ class _HslColor(_Color):
 
 
 class _NoneColor(_Color):
+    @property
+    def alpha(self):
+        """Return 1.0 (fully opaque) when no color is defined."""
+        return 1.0
+
     @property
     def color_type(self):
         return None
