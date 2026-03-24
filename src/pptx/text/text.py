@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         CT_TextParagraph,
         CT_TextParagraphProperties,
     )
+    from pptx.text.bullet import BulletFormat
     from pptx.types import ProvidesExtents, ProvidesPart
 
 
@@ -493,6 +494,17 @@ class _Paragraph(Subshape):
     @alignment.setter
     def alignment(self, value: PP_PARAGRAPH_ALIGNMENT | None):
         self._pPr.algn = value
+
+    @property
+    def bullet(self) -> BulletFormat:
+        """|BulletFormat| object providing access to bullet formatting for this paragraph.
+
+        Provides properties to read and write bullet type, character, auto-numbering
+        scheme, font, size, and color.
+        """
+        from pptx.text.bullet import BulletFormat
+
+        return BulletFormat(self._pPr)
 
     def clear(self):
         """Remove all content from this paragraph.

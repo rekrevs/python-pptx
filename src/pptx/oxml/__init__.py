@@ -456,12 +456,22 @@ register_element_cls("a:tr", CT_TableRow)
 
 from pptx.oxml.text import (  # noqa: E402
     CT_RegularTextRun,
+    CT_TextAutonumberBullet,
     CT_TextBody,
     CT_TextBodyProperties,
+    CT_TextBulletColor,
+    CT_TextBulletColorFollowText,
+    CT_TextBulletFont,
+    CT_TextBulletFontFollowText,
+    CT_TextBulletSizeFollowText,
+    CT_TextBulletSizePercent,
+    CT_TextBulletSizePoint,
+    CT_TextCharBullet,
     CT_TextCharacterProperties,
     CT_TextField,
     CT_TextFont,
     CT_TextLineBreak,
+    CT_TextNoBullet,
     CT_TextNormalAutofit,
     CT_TextParagraph,
     CT_TextParagraphProperties,
@@ -472,6 +482,16 @@ from pptx.oxml.text import (  # noqa: E402
 
 register_element_cls("a:bodyPr", CT_TextBodyProperties)
 register_element_cls("a:br", CT_TextLineBreak)
+register_element_cls("a:buAutoNum", CT_TextAutonumberBullet)
+register_element_cls("a:buChar", CT_TextCharBullet)
+register_element_cls("a:buClr", CT_TextBulletColor)
+register_element_cls("a:buClrTx", CT_TextBulletColorFollowText)
+register_element_cls("a:buFont", CT_TextBulletFont)
+register_element_cls("a:buFontTx", CT_TextBulletFontFollowText)
+register_element_cls("a:buNone", CT_TextNoBullet)
+register_element_cls("a:buSzPct", CT_TextBulletSizePercent)
+register_element_cls("a:buSzPts", CT_TextBulletSizePoint)
+register_element_cls("a:buSzTx", CT_TextBulletSizeFollowText)
 register_element_cls("a:defRPr", CT_TextCharacterProperties)
 register_element_cls("a:endParaRPr", CT_TextCharacterProperties)
 register_element_cls("a:fld", CT_TextField)

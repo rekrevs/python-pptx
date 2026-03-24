@@ -26,6 +26,8 @@ from pptx.oxml.simpletypes import (
     ST_TextTypeface,
     ST_TextWrappingType,
     XsdBoolean,
+    XsdInt,
+    XsdString,
 )
 from pptx.oxml.xmlchemy import (
     BaseOxmlElement,
@@ -459,35 +461,116 @@ class CT_TextParagraph(BaseOxmlElement):
         return parse_xml(r_xml)
 
 
+class CT_TextAutonumberBullet(BaseOxmlElement):
+    """`a:buAutoNum` element class."""
+
+    type: str = RequiredAttribute("type", XsdString)  # pyright: ignore[reportAssignmentType]
+    startAt: int | None = OptionalAttribute(  # pyright: ignore[reportAssignmentType]
+        "startAt", XsdInt
+    )
+
+
+class CT_TextBulletColor(BaseOxmlElement):
+    """`a:buClr` element class - has color choice child."""
+
+    eg_colorChoice = ZeroOrOneChoice(
+        (
+            Choice("a:scrgbClr"),
+            Choice("a:srgbClr"),
+            Choice("a:hslClr"),
+            Choice("a:sysClr"),
+            Choice("a:schemeClr"),
+            Choice("a:prstClr"),
+        ),
+        successors=(),
+    )
+
+
+class CT_TextBulletColorFollowText(BaseOxmlElement):
+    """`a:buClrTx` element class."""
+
+
+class CT_TextBulletFont(BaseOxmlElement):
+    """`a:buFont` element class."""
+
+    typeface: str = RequiredAttribute(  # pyright: ignore[reportAssignmentType]
+        "typeface", ST_TextTypeface
+    )
+
+
+class CT_TextBulletFontFollowText(BaseOxmlElement):
+    """`a:buFontTx` element class."""
+
+
+class CT_TextBulletSizeFollowText(BaseOxmlElement):
+    """`a:buSzTx` element class."""
+
+
+class CT_TextBulletSizePercent(BaseOxmlElement):
+    """`a:buSzPct` element class."""
+
+    val: int = RequiredAttribute("val", XsdInt)  # pyright: ignore[reportAssignmentType]
+
+
+class CT_TextBulletSizePoint(BaseOxmlElement):
+    """`a:buSzPts` element class."""
+
+    val: int = RequiredAttribute(  # pyright: ignore[reportAssignmentType]
+        "val", ST_TextFontSize
+    )
+
+
+class CT_TextCharBullet(BaseOxmlElement):
+    """`a:buChar` element class."""
+
+    char: str = RequiredAttribute("char", XsdString)  # pyright: ignore[reportAssignmentType]
+
+
+class CT_TextNoBullet(BaseOxmlElement):
+    """`a:buNone` element class."""
+
+
 class CT_TextParagraphProperties(BaseOxmlElement):
     """`a:pPr` custom element class."""
 
+    get_or_add_buClr: Callable[[], CT_TextBulletColor]
+    get_or_add_buFont: Callable[[], CT_TextBulletFont]
+    get_or_add_buSzPts: Callable[[], CT_TextBulletSizePoint]
     get_or_add_defRPr: Callable[[], CT_TextCharacterProperties]
+    _add_buAutoNum: Callable[[], CT_TextAutonumberBullet]
+    _add_buChar: Callable[[], CT_TextCharBullet]
+    _add_buNone: Callable[[], CT_TextNoBullet]
     _add_lnSpc: Callable[[], CT_TextSpacing]
     _add_spcAft: Callable[[], CT_TextSpacing]
     _add_spcBef: Callable[[], CT_TextSpacing]
+    _remove_buAutoNum: Callable[[], None]
+    _remove_buChar: Callable[[], None]
+    _remove_buClr: Callable[[], None]
+    _remove_buFont: Callable[[], None]
+    _remove_buNone: Callable[[], None]
+    _remove_buSzPts: Callable[[], None]
     _remove_lnSpc: Callable[[], None]
     _remove_spcAft: Callable[[], None]
     _remove_spcBef: Callable[[], None]
 
     _tag_seq = (
-        "a:lnSpc",
-        "a:spcBef",
-        "a:spcAft",
-        "a:buClrTx",
-        "a:buClr",
-        "a:buSzTx",
-        "a:buSzPct",
-        "a:buSzPts",
-        "a:buFontTx",
-        "a:buFont",
-        "a:buNone",
-        "a:buAutoNum",
-        "a:buChar",
-        "a:buBlip",
-        "a:tabLst",
-        "a:defRPr",
-        "a:extLst",
+        "a:lnSpc",     # 0
+        "a:spcBef",     # 1
+        "a:spcAft",     # 2
+        "a:buClrTx",    # 3
+        "a:buClr",      # 4
+        "a:buSzTx",     # 5
+        "a:buSzPct",    # 6
+        "a:buSzPts",    # 7
+        "a:buFontTx",   # 8
+        "a:buFont",     # 9
+        "a:buNone",     # 10
+        "a:buAutoNum",  # 11
+        "a:buChar",     # 12
+        "a:buBlip",     # 13
+        "a:tabLst",     # 14
+        "a:defRPr",     # 15
+        "a:extLst",     # 16
     )
     lnSpc: CT_TextSpacing | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "a:lnSpc", successors=_tag_seq[1:]
@@ -497,6 +580,24 @@ class CT_TextParagraphProperties(BaseOxmlElement):
     )
     spcAft: CT_TextSpacing | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "a:spcAft", successors=_tag_seq[3:]
+    )
+    buClr: CT_TextBulletColor | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "a:buClr", successors=_tag_seq[5:]
+    )
+    buSzPts: CT_TextBulletSizePoint | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "a:buSzPts", successors=_tag_seq[8:]
+    )
+    buFont: CT_TextBulletFont | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "a:buFont", successors=_tag_seq[10:]
+    )
+    buNone: CT_TextNoBullet | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "a:buNone", successors=_tag_seq[11:]
+    )
+    buAutoNum: CT_TextAutonumberBullet | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "a:buAutoNum", successors=_tag_seq[12:]
+    )
+    buChar: CT_TextCharBullet | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
+        "a:buChar", successors=_tag_seq[13:]
     )
     defRPr: CT_TextCharacterProperties | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "a:defRPr", successors=_tag_seq[16:]
@@ -508,6 +609,12 @@ class CT_TextParagraphProperties(BaseOxmlElement):
         "algn", PP_PARAGRAPH_ALIGNMENT
     )  # pyright: ignore[reportAssignmentType]
     del _tag_seq
+
+    def _clear_bullet_type(self) -> None:
+        """Remove any buNone, buAutoNum, buChar elements (mutually exclusive)."""
+        self._remove_buNone()
+        self._remove_buAutoNum()
+        self._remove_buChar()
 
     @property
     def line_spacing(self) -> float | Length | None:
