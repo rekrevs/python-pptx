@@ -44,6 +44,8 @@ def ChartXmlWriter(chart_type, chart_data):
             XL_CT.RADAR_MARKERS: _RadarChartXmlWriter,
             XL_CT.STOCK_HLC: _StockChartXmlWriter,
             XL_CT.STOCK_OHLC: _StockChartXmlWriter,
+            XL_CT.STOCK_VHLC: _VolumeStockChartXmlWriter,
+            XL_CT.STOCK_VOHLC: _VolumeStockChartXmlWriter,
             XL_CT.SURFACE: _SurfaceChartXmlWriter,
             XL_CT.SURFACE_TOP_VIEW: _SurfaceChartXmlWriter,
             XL_CT.SURFACE_TOP_VIEW_WIREFRAME: _SurfaceChartXmlWriter,
@@ -1414,6 +1416,233 @@ class _StockChartXmlWriter(_BaseChartXmlWriter):
                 }
             )
         return xml
+
+
+class _VolumeStockChartXmlWriter(_BaseChartXmlWriter):
+    """
+    Generates XML for volume stock charts (VHLC and VOHLC).
+
+    Volume stock charts are multi-plot charts combining a ``<c:barChart>``
+    for volume data with a ``<c:stockChart>`` for price data. They require
+    three axes: a shared category axis, a primary value axis (price, left),
+    and a secondary value axis (volume, right).
+
+    VHLC has 4 series: Volume, High, Low, Close
+    VOHLC has 5 series: Volume, Open, High, Low, Close
+    """
+
+    # Axis IDs — deterministic large integers matching the existing pattern
+    _CAT_AX_ID = "2118791784"
+    _PRI_VAL_AX_ID = "2140495176"
+    _SEC_VAL_AX_ID = "2107640568"
+
+    @property
+    def xml(self):
+        return (
+            "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n"
+            '<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawin'
+            'gml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/draw'
+            'ingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/off'
+            'iceDocument/2006/relationships">\n'
+            '  <c:date1904 val="0"/>\n'
+            "  <c:chart>\n"
+            '    <c:autoTitleDeleted val="0"/>\n'
+            "    <c:plotArea>\n"
+            "      <c:barChart>\n"
+            '        <c:barDir val="col"/>\n'
+            '        <c:grouping val="clustered"/>\n'
+            '        <c:varyColors val="0"/>\n'
+            "{bar_ser_xml}"
+            '        <c:axId val="{cat_ax_id}"/>\n'
+            '        <c:axId val="{sec_val_ax_id}"/>\n'
+            "      </c:barChart>\n"
+            "      <c:stockChart>\n"
+            "{stock_ser_xml}"
+            "        <c:hiLowLines/>\n"
+            "{upDownBars_xml}"
+            '        <c:axId val="{cat_ax_id}"/>\n'
+            '        <c:axId val="{pri_val_ax_id}"/>\n'
+            "      </c:stockChart>\n"
+            "{cat_ax_xml}"
+            "      <c:valAx>\n"
+            '        <c:axId val="{pri_val_ax_id}"/>\n'
+            "        <c:scaling/>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="l"/>\n'
+            "        <c:majorGridlines/>\n"
+            '        <c:numFmt formatCode="General" sourceLinked="1"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="{cat_ax_id}"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            "      </c:valAx>\n"
+            "      <c:valAx>\n"
+            '        <c:axId val="{sec_val_ax_id}"/>\n'
+            "        <c:scaling/>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="r"/>\n'
+            '        <c:numFmt formatCode="General" sourceLinked="1"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="{cat_ax_id}"/>\n'
+            '        <c:crosses val="max"/>\n'
+            "      </c:valAx>\n"
+            "    </c:plotArea>\n"
+            "    <c:legend>\n"
+            '      <c:legendPos val="r"/>\n'
+            "      <c:layout/>\n"
+            '      <c:overlay val="0"/>\n'
+            "    </c:legend>\n"
+            '    <c:plotVisOnly val="1"/>\n'
+            '    <c:dispBlanksAs val="gap"/>\n'
+            '    <c:showDLblsOverMax val="0"/>\n'
+            "  </c:chart>\n"
+            "  <c:txPr>\n"
+            "    <a:bodyPr/>\n"
+            "    <a:lstStyle/>\n"
+            "    <a:p>\n"
+            "      <a:pPr>\n"
+            '        <a:defRPr sz="1800"/>\n'
+            "      </a:pPr>\n"
+            '      <a:endParaRPr lang="en-US"/>\n'
+            "    </a:p>\n"
+            "  </c:txPr>\n"
+            "</c:chartSpace>\n"
+        ).format(
+            **{
+                "bar_ser_xml": self._bar_ser_xml,
+                "stock_ser_xml": self._stock_ser_xml,
+                "upDownBars_xml": self._upDownBars_xml,
+                "cat_ax_xml": self._cat_ax_xml,
+                "cat_ax_id": self._CAT_AX_ID,
+                "pri_val_ax_id": self._PRI_VAL_AX_ID,
+                "sec_val_ax_id": self._SEC_VAL_AX_ID,
+            }
+        )
+
+    @property
+    def _bar_ser_xml(self):
+        """Return XML for the volume series in the barChart (series index 0)."""
+        series = self._series_seq[0]
+        xml_writer = _CategorySeriesXmlWriter(series)
+        return (
+            "        <c:ser>\n"
+            '          <c:idx val="{ser_idx}"/>\n'
+            '          <c:order val="{ser_order}"/>\n'
+            "{tx_xml}"
+            "{cat_xml}"
+            "{val_xml}"
+            "        </c:ser>\n"
+        ).format(
+            **{
+                "ser_idx": series.index,
+                "ser_order": series.index,
+                "tx_xml": xml_writer.tx_xml,
+                "cat_xml": xml_writer.cat_xml,
+                "val_xml": xml_writer.val_xml,
+            }
+        )
+
+    @property
+    def _stock_ser_xml(self):
+        """Return XML for the price series in the stockChart (series index 1+)."""
+        xml = ""
+        for series in self._series_seq[1:]:
+            xml_writer = _CategorySeriesXmlWriter(series)
+            xml += (
+                "        <c:ser>\n"
+                '          <c:idx val="{ser_idx}"/>\n'
+                '          <c:order val="{ser_order}"/>\n'
+                "{tx_xml}"
+                "          <c:marker>\n"
+                '            <c:symbol val="none"/>\n'
+                "          </c:marker>\n"
+                "{cat_xml}"
+                "{val_xml}"
+                '          <c:smooth val="0"/>\n'
+                "        </c:ser>\n"
+            ).format(
+                **{
+                    "ser_idx": series.index,
+                    "ser_order": series.index,
+                    "tx_xml": xml_writer.tx_xml,
+                    "cat_xml": xml_writer.cat_xml,
+                    "val_xml": xml_writer.val_xml,
+                }
+            )
+        return xml
+
+    @property
+    def _cat_ax_xml(self):
+        categories = self._chart_data.categories
+
+        if categories.are_dates:
+            return (
+                "      <c:dateAx>\n"
+                '        <c:axId val="{cat_ax_id}"/>\n'
+                "        <c:scaling>\n"
+                '          <c:orientation val="minMax"/>\n'
+                "        </c:scaling>\n"
+                '        <c:delete val="0"/>\n'
+                '        <c:axPos val="b"/>\n'
+                '        <c:numFmt formatCode="{nf}" sourceLinked="1"/>\n'
+                '        <c:majorTickMark val="out"/>\n'
+                '        <c:minorTickMark val="none"/>\n'
+                '        <c:tickLblPos val="nextTo"/>\n'
+                '        <c:crossAx val="{pri_val_ax_id}"/>\n'
+                '        <c:crosses val="autoZero"/>\n'
+                '        <c:auto val="1"/>\n'
+                '        <c:lblOffset val="100"/>\n'
+                '        <c:baseTimeUnit val="days"/>\n'
+                "      </c:dateAx>\n"
+            ).format(
+                **{
+                    "nf": categories.number_format,
+                    "cat_ax_id": self._CAT_AX_ID,
+                    "pri_val_ax_id": self._PRI_VAL_AX_ID,
+                }
+            )
+
+        return (
+            "      <c:catAx>\n"
+            '        <c:axId val="{cat_ax_id}"/>\n'
+            "        <c:scaling>\n"
+            '          <c:orientation val="minMax"/>\n'
+            "        </c:scaling>\n"
+            '        <c:delete val="0"/>\n'
+            '        <c:axPos val="b"/>\n'
+            '        <c:majorTickMark val="out"/>\n'
+            '        <c:minorTickMark val="none"/>\n'
+            '        <c:tickLblPos val="nextTo"/>\n'
+            '        <c:crossAx val="{pri_val_ax_id}"/>\n'
+            '        <c:crosses val="autoZero"/>\n'
+            '        <c:auto val="1"/>\n'
+            '        <c:lblAlgn val="ctr"/>\n'
+            '        <c:lblOffset val="100"/>\n'
+            '        <c:noMultiLvlLbl val="0"/>\n'
+            "      </c:catAx>\n"
+        ).format(
+            **{
+                "cat_ax_id": self._CAT_AX_ID,
+                "pri_val_ax_id": self._PRI_VAL_AX_ID,
+            }
+        )
+
+    @property
+    def _upDownBars_xml(self):
+        """Return upDownBars XML for VOHLC charts, empty string for VHLC."""
+        XL = XL_CHART_TYPE
+        if self._chart_type == XL.STOCK_VOHLC:
+            return (
+                "        <c:upDownBars>\n"
+                '          <c:gapWidth val="150"/>\n'
+                "          <c:upBars/>\n"
+                "          <c:downBars/>\n"
+                "        </c:upDownBars>\n"
+            )
+        return ""
 
 
 class _XyChartXmlWriter(_BaseChartXmlWriter):

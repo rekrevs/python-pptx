@@ -10,6 +10,8 @@ from pptx.chart.plot import PlotFactory, PlotTypeInspector
 from pptx.chart.series import SeriesCollection
 from pptx.chart.xmlwriter import SeriesXmlRewriterFactory
 from pptx.dml.chtfmt import ChartFormat
+from pptx.enum.chart import XL_CHART_TYPE
+from pptx.oxml.ns import qn
 from pptx.shared import ElementProxy, PartElementProxy
 from pptx.text.text import Font, TextFrame
 from pptx.util import lazyproperty
@@ -82,8 +84,25 @@ class Chart(PartElementProxy):
 
         If the chart has two plots, for example, a line plot overlayed on a bar plot,
         the type reported is for the first (back-most) plot. Read-only.
+
+        Volume stock charts (VHLC/VOHLC) are a special case: they combine a
+        barChart (volume) with a stockChart (price). This combination is detected
+        and reported as the appropriate volume stock chart type.
         """
-        first_plot = self.plots[0]
+        plots = self.plots
+        if len(plots) == 2:
+            xCharts = self._chartSpace.chart.plotArea.xCharts
+            tags = [xChart.tag for xChart in xCharts]
+            if qn("c:barChart") in tags and qn("c:stockChart") in tags:
+                # Volume stock chart — differentiate VHLC vs VOHLC by
+                # the number of series in the stockChart element
+                stockChart = next(xc for xc in xCharts if xc.tag == qn("c:stockChart"))
+                stock_ser_count = len(stockChart.xpath("c:ser"))
+                if stock_ser_count == 4:
+                    return XL_CHART_TYPE.STOCK_VOHLC
+                return XL_CHART_TYPE.STOCK_VHLC
+
+        first_plot = plots[0]
         return PlotTypeInspector.chart_type(first_plot)
 
     @lazyproperty

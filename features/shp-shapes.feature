@@ -154,9 +154,11 @@ Feature: Access a shape on a slide
       And the chart has an Excel data worksheet
 
     Examples: Stock chart types
-      | type         | chart-type | sers |
-      | Stock HLC    | STOCK_HLC  |   3  |
-      | Stock OHLC   | STOCK_OHLC |   4  |
+      | type         | chart-type  | sers |
+      | Stock HLC    | STOCK_HLC   |   3  |
+      | Stock OHLC   | STOCK_OHLC  |   4  |
+      | Stock VHLC   | STOCK_VHLC  |   4  |
+      | Stock VOHLC  | STOCK_VOHLC |   5  |
 
 
   Scenario Outline: SlideShapes.add_chart() (surface chart)

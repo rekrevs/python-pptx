@@ -34,6 +34,7 @@ from pptx.chart.xmlwriter import (
     _RadarChartXmlWriter,
     _StockChartXmlWriter,
     _SurfaceChartXmlWriter,
+    _VolumeStockChartXmlWriter,
     _XyChartXmlWriter,
     _XySeriesXmlRewriter,
     _XySeriesXmlWriter,
@@ -84,6 +85,8 @@ class DescribeChartXmlWriter(object):
             ("RADAR_MARKERS", _RadarChartXmlWriter),
             ("STOCK_HLC", _StockChartXmlWriter),
             ("STOCK_OHLC", _StockChartXmlWriter),
+            ("STOCK_VHLC", _VolumeStockChartXmlWriter),
+            ("STOCK_VOHLC", _VolumeStockChartXmlWriter),
             ("SURFACE", _SurfaceChartXmlWriter),
             ("SURFACE_TOP_VIEW", _SurfaceChartXmlWriter),
             ("SURFACE_TOP_VIEW_WIREFRAME", _SurfaceChartXmlWriter),
@@ -330,6 +333,22 @@ class Describe_StockChartXmlWriter(object):
         xml_writer = _StockChartXmlWriter(XL_CHART_TYPE.STOCK_OHLC, chart_data)
 
         assert xml_writer.xml == snippet_text("2x4-stock-ohlc")
+
+
+class Describe_VolumeStockChartXmlWriter(object):
+    """Unit-test suite for `pptx.chart.xmlwriter._VolumeStockChartXmlWriter`."""
+
+    def it_can_generate_xml_for_stock_vhlc_chart(self):
+        chart_data = make_volume_stock_chart_data(cat_count=2, is_vohlc=False)
+        xml_writer = _VolumeStockChartXmlWriter(XL_CHART_TYPE.STOCK_VHLC, chart_data)
+
+        assert xml_writer.xml == snippet_text("2x4-stock-vhlc")
+
+    def it_can_generate_xml_for_stock_vohlc_chart(self):
+        chart_data = make_volume_stock_chart_data(cat_count=2, is_vohlc=True)
+        xml_writer = _VolumeStockChartXmlWriter(XL_CHART_TYPE.STOCK_VOHLC, chart_data)
+
+        assert xml_writer.xml == snippet_text("2x5-stock-vohlc")
 
 
 class Describe_SurfaceChartXmlWriter(object):
@@ -758,6 +777,27 @@ def make_stock_chart_data(cat_count, is_ohlc):
 
     # Stock price data: High=25-28, Low=20-22, Close=23-26, Open=22-24
     if is_ohlc:
+        chart_data.add_series("Open", (22.0, 24.0)[:cat_count])
+    chart_data.add_series("High", (25.0, 28.0)[:cat_count])
+    chart_data.add_series("Low", (20.0, 22.0)[:cat_count])
+    chart_data.add_series("Close", (23.0, 26.0)[:cat_count])
+
+    return chart_data
+
+
+def make_volume_stock_chart_data(cat_count, is_vohlc):
+    """
+    Return a |CategoryChartData| object populated for volume stock chart testing.
+
+    For VHLC (is_vohlc=False): 4 series (Volume, High, Low, Close)
+    For VOHLC (is_vohlc=True): 5 series (Volume, Open, High, Low, Close)
+    """
+    chart_data = CategoryChartData()
+    chart_data.categories = ["Day 1", "Day 2"][:cat_count]
+
+    # Volume data first, then price data
+    chart_data.add_series("Volume", (1000000.0, 1200000.0)[:cat_count])
+    if is_vohlc:
         chart_data.add_series("Open", (22.0, 24.0)[:cat_count])
     chart_data.add_series("High", (25.0, 28.0)[:cat_count])
     chart_data.add_series("Low", (20.0, 22.0)[:cat_count])
