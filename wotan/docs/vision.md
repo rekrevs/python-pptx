@@ -28,11 +28,11 @@ A Python library that can:
 
 ### Presentation Level
 - [x] Core properties (title, author, etc.)
-- [ ] Custom properties
+- [x] **Custom properties** ✅ xtend
 - [x] Slide dimensions and settings
-- [ ] Theme access and modification
-- [ ] Color schemes
-- [ ] Font schemes
+- [x] **Theme access and modification** ✅ xtend
+- [x] **Color schemes** ✅ xtend
+- [x] **Font schemes** ✅ xtend
 
 ### Slide Level
 - [x] All slide types (regular, layout, master, notes, handout)
@@ -40,7 +40,7 @@ A Python library that can:
 - [x] Background (all fill types)
 - [x] **Transitions (including Morph)** ✅ xtend
 - [ ] Animations and timing
-- [ ] Slide comments
+- [x] **Slide comments** ✅ xtend
 
 ### Shape Level
 - [x] All shape types (auto, text, picture, chart, table, group, connector, media)
@@ -48,14 +48,15 @@ A Python library that can:
 - [x] **3D models (detection/preserve)** ✅ xtend
 - [x] Shape properties (position, size, rotation, flip)
 - [x] Shape geometry (preset and custom)
-- [ ] Shape effects (shadow, reflection, glow, soft edge, 3D)
+- [x] **Shape effects (shadow, reflection, glow, soft edge)** ✅ xtend
 - [x] Shape styles
+- [x] **Alt text / accessibility** ✅ xtend
 
 ### Text Level
 - [x] Text frames and body properties
 - [x] Paragraphs (all properties)
 - [x] Runs (all character properties)
-- [ ] Bullet and numbering (full formatting - basic level done)
+- [x] **Bullet and numbering (full formatting)** ✅ xtend
 - [ ] Tabs and indentation (XML only)
 - [ ] Text effects
 - [x] Hyperlinks
@@ -65,9 +66,10 @@ A Python library that can:
 - [x] All line types (solid, gradient, pattern)
 - [x] Line endings (arrows, etc.)
 - [x] Color (RGB, theme, HSL, system, with all transformations)
+- [x] **Color transparency/alpha** ✅ xtend
 
 ### Rich Content
-- [x] **Charts (all types including ChartEx)** ✅ xtend
+- [x] **Charts (all types including ChartEx and volume stock)** ✅ xtend
 - [x] Tables (all properties, merged cells)
 - [x] **SmartArt (read structure and text)** ✅ xtend
 - [x] Media (video, audio)
