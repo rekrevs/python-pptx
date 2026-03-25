@@ -34,6 +34,15 @@ class Presentation(PartElementProxy):
         return self.part.core_properties
 
     @property
+    def custom_properties(self):
+        """|CustomPropertiesPart| providing dict-like access to custom document properties.
+
+        Returns a dict-like object supporting ``__getitem__``, ``__setitem__``,
+        ``__delitem__``, ``__contains__``, ``__len__``, and ``__iter__``.
+        """
+        return self.part.custom_properties
+
+    @property
     def notes_master(self) -> NotesMaster:
         """Instance of |NotesMaster| for this presentation.
 

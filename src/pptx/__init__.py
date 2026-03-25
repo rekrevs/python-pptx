@@ -12,6 +12,7 @@ from pptx.opc.package import PartFactory
 from pptx.parts.chart import ChartPart
 from pptx.parts.chartex import ChartExPart
 from pptx.parts.coreprops import CorePropertiesPart
+from pptx.parts.customprops import CustomPropertiesPart
 from pptx.parts.diagram import DiagramDataPart
 from pptx.parts.image import ImagePart
 from pptx.parts.media import MediaPart
@@ -40,6 +41,7 @@ content_type_to_part_class_map: dict[str, type[Part]] = {
     CT.PML_TEMPLATE_MAIN: PresentationPart,
     CT.PML_SLIDESHOW_MAIN: PresentationPart,
     CT.OPC_CORE_PROPERTIES: CorePropertiesPart,
+    CT.OFC_CUSTOM_PROPERTIES: CustomPropertiesPart,
     CT.PML_NOTES_MASTER: NotesMasterPart,
     CT.PML_NOTES_SLIDE: NotesSlidePart,
     CT.PML_SLIDE: SlidePart,
@@ -76,6 +78,7 @@ del (
     ChartPart,
     ChartExPart,
     CorePropertiesPart,
+    CustomPropertiesPart,
     DiagramDataPart,
     ImagePart,
     MediaPart,
