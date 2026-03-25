@@ -612,3 +612,16 @@ from pptx.oxml.slide.zoom import (  # noqa: E402
 register_element_cls("pslz:sldZm", CT_SlideZoom)
 register_element_cls("pslz:sldZmObj", CT_SlideZoomObject)
 register_element_cls("p166:zmPr", CT_ZoomObjectProperties)
+
+
+from pptx.oxml.comment import (  # noqa: E402
+    CT_Comment,
+    CT_CommentAuthor,
+    CT_CommentAuthorList,
+    CT_CommentList,
+)
+
+register_element_cls("p:cm", CT_Comment)
+register_element_cls("p:cmAuthor", CT_CommentAuthor)
+register_element_cls("p:cmAuthorLst", CT_CommentAuthorList)
+register_element_cls("p:cmLst", CT_CommentList)

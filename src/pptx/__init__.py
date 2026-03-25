@@ -11,6 +11,7 @@ from pptx.opc.constants import CONTENT_TYPE as CT
 from pptx.opc.package import PartFactory
 from pptx.parts.chart import ChartPart
 from pptx.parts.chartex import ChartExPart
+from pptx.parts.comment import CommentAuthorsPart, SlideCommentsPart
 from pptx.parts.coreprops import CorePropertiesPart
 from pptx.parts.customprops import CustomPropertiesPart
 from pptx.parts.diagram import DiagramDataPart
@@ -49,6 +50,8 @@ content_type_to_part_class_map: dict[str, type[Part]] = {
     CT.PML_SLIDE_MASTER: SlideMasterPart,
     CT.DML_CHART: ChartPart,
     CT.OFC_CHART_EX: ChartExPart,
+    CT.PML_COMMENTS: SlideCommentsPart,
+    CT.PML_COMMENT_AUTHORS: CommentAuthorsPart,
     CT.DML_DIAGRAM_DATA: DiagramDataPart,
     CT.BMP: ImagePart,
     CT.GIF: ImagePart,
@@ -77,6 +80,8 @@ PartFactory.part_type_for.update(content_type_to_part_class_map)
 del (
     ChartPart,
     ChartExPart,
+    CommentAuthorsPart,
+    SlideCommentsPart,
     CorePropertiesPart,
     CustomPropertiesPart,
     DiagramDataPart,

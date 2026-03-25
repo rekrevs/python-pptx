@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterator, cast
 
+from pptx.comment import Comment
 from pptx.dml.fill import FillFormat
 from pptx.enum.shapes import PP_PLACEHOLDER
 from pptx.shapes.shapetree import (
@@ -177,6 +178,22 @@ class Slide(_BaseSlide):
     """Slide object. Provides access to shapes and slide-level properties."""
 
     part: SlidePart  # pyright: ignore[reportIncompatibleMethodOverride]
+
+    def add_comment(self, text: str, author_name: str) -> Comment:
+        """Add a comment to this slide and return the new |Comment| object.
+
+        `text` is the comment text. `author_name` is the display name of the author; the author
+        is created in the comment authors part if not already present.
+        """
+        return self.part.add_comment(text, author_name)
+
+    @property
+    def comments(self) -> list[Comment]:
+        """List of |Comment| objects for this slide.
+
+        Returns an empty list if the slide has no comments.
+        """
+        return self.part.comments
 
     @property
     def follow_master_background(self):

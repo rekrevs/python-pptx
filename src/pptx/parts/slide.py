@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import IO, TYPE_CHECKING, cast
 
+from pptx.comment import Comment
 from pptx.enum.shapes import PROG_ID
 from pptx.opc.constants import CONTENT_TYPE as CT
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
@@ -12,6 +13,7 @@ from pptx.opc.packuri import PackURI
 from pptx.oxml.slide import CT_NotesMaster, CT_NotesSlide, CT_Slide
 from pptx.oxml.theme import CT_OfficeStyleSheet
 from pptx.parts.chart import ChartPart
+from pptx.parts.comment import CommentAuthorsPart, SlideCommentsPart
 from pptx.parts.embeddedpackage import EmbeddedPackagePart
 from pptx.slide import NotesMaster, NotesSlide, Slide, SlideLayout, SlideMaster
 from pptx.util import lazyproperty
@@ -190,6 +192,24 @@ class SlidePart(BaseSlidePart):
             ChartExPart.new(layout_id, chart_data, self._package), RT.CHART_EX
         )
 
+    def add_comment(self, text: str, author_name: str) -> Comment:
+        """Add a comment to this slide and return the new |Comment| object.
+
+        Creates the comment-authors part and slide-comments part as needed. The author
+        is created if not already present in the comment-authors part.
+        """
+        authors_part = self._get_or_add_authors_part()
+        comments_part = self._get_or_add_comments_part()
+        # --- get or create author ---
+        author = authors_part._element.get_author_by_name(author_name)
+        if author is None:
+            author = authors_part._element.add_author(author_name)
+        author_id = author.id
+        new_idx = author.lastIdx + 1
+        author.lastIdx = new_idx
+        cm = comments_part._element.add_comment(author_id, new_idx, text)
+        return Comment(cm, authors_part)
+
     def add_embedded_ole_object_part(
         self, prog_id: PROG_ID | str, ole_object_file: str | IO[bytes]
     ):
@@ -201,6 +221,18 @@ class SlidePart(BaseSlidePart):
             ),
             relationship_type,
         )
+
+    @property
+    def comments(self) -> list[Comment]:
+        """List of |Comment| objects for this slide.
+
+        Returns an empty list if the slide has no comments part.
+        """
+        comments_part = self._get_comments_part()
+        if comments_part is None:
+            return []
+        authors_part = self._get_authors_part()
+        return [Comment(cm, authors_part) for cm in comments_part._element.cm_lst]
 
     def get_or_add_video_media_part(self, video: Video) -> tuple[str, str]:
         """Return rIds for media and video relationships to media part.
@@ -272,6 +304,38 @@ class SlidePart(BaseSlidePart):
         notes_slide_part = NotesSlidePart.new(self.package, self)
         self.relate_to(notes_slide_part, RT.NOTES_SLIDE)
         return notes_slide_part
+
+    def _get_authors_part(self) -> CommentAuthorsPart | None:
+        """Return |CommentAuthorsPart| for the presentation, or None."""
+        try:
+            return self.package.part_related_by(RT.COMMENT_AUTHORS)
+        except KeyError:
+            return None
+
+    def _get_or_add_authors_part(self) -> CommentAuthorsPart:
+        """Return |CommentAuthorsPart| for the presentation, creating if needed."""
+        try:
+            return self.package.part_related_by(RT.COMMENT_AUTHORS)
+        except KeyError:
+            authors_part = CommentAuthorsPart.default(self.package)
+            self.package.relate_to(authors_part, RT.COMMENT_AUTHORS)
+            return authors_part
+
+    def _get_comments_part(self) -> SlideCommentsPart | None:
+        """Return |SlideCommentsPart| for this slide, or None."""
+        try:
+            return self.part_related_by(RT.COMMENTS)
+        except KeyError:
+            return None
+
+    def _get_or_add_comments_part(self) -> SlideCommentsPart:
+        """Return |SlideCommentsPart| for this slide, creating if needed."""
+        try:
+            return self.part_related_by(RT.COMMENTS)
+        except KeyError:
+            comments_part = SlideCommentsPart.new(self.package)
+            self.relate_to(comments_part, RT.COMMENTS)
+            return comments_part
 
 
 class SlideLayoutPart(BaseSlidePart):
