@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from pptx.shapes.placeholder import LayoutPlaceholder, MasterPlaceholder
     from pptx.shapes.shapetree import NotesSlidePlaceholder
     from pptx.text.text import TextFrame
+    from pptx.theme import Theme
 
 
 class _BaseSlide(PartElementProxy):
@@ -606,11 +607,20 @@ class SlideMaster(_BaseMaster):
     """
 
     _element: CT_SlideMaster  # pyright: ignore[reportIncompatibleVariableOverride]
+    part: SlideMasterPart  # pyright: ignore[reportIncompatibleMethodOverride]
 
     @lazyproperty
     def slide_layouts(self) -> SlideLayouts:
         """|SlideLayouts| object providing access to this slide-master's layouts."""
         return SlideLayouts(self._element.get_or_add_sldLayoutIdLst(), self)
+
+    @property
+    def theme(self) -> Theme:
+        """Return the |Theme| object for this slide master."""
+        from pptx.theme import Theme
+
+        theme_part = self.part.theme_part
+        return Theme(theme_part._element, theme_part)
 
 
 class SlideMasters(ParentedElementProxy):

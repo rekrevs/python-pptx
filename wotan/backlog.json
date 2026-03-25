@@ -23,7 +23,7 @@
     {"id": "T-0019", "status": "DONE", "size": "M", "summary": "ChartEx BDD acceptance tests (Waterfall, Funnel, BoxWhisker, RegionMap)"},
     {"id": "T-0020", "status": "DONE", "size": "M", "summary": "Bullet and numbering formatting API"},
     {"id": "T-0021", "status": "DONE", "size": "M", "summary": "Custom document properties"},
-    {"id": "T-0022", "status": "READY", "size": "L", "summary": "Theme access API (color scheme, font scheme)"},
+    {"id": "T-0022", "status": "DONE", "size": "L", "summary": "Theme access API (color scheme, font scheme)"},
     {"id": "T-0023", "status": "READY", "size": "L", "summary": "Shape effects API (shadow, glow, reflection, soft edge)"},
     {"id": "T-0024", "status": "DONE", "size": "M", "summary": "Slide comments (read/write)"}
   ]

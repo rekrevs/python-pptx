@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from pptx.enum.dml import MSO_THEME_COLOR
-from pptx.oxml.simpletypes import ST_HexColorRGB, ST_Percentage
+from pptx.oxml.simpletypes import ST_HexColorRGB, ST_Percentage, XsdString
 from pptx.oxml.xmlchemy import (
     BaseOxmlElement,
     Choice,
+    OptionalAttribute,
     RequiredAttribute,
     ZeroOrOne,
     ZeroOrOneChoice,
@@ -121,3 +122,8 @@ class CT_SystemColor(_BaseColorElement):
     """
     Custom element class for <a:sysClr> element.
     """
+
+    lastClr: str | None = OptionalAttribute(  # pyright: ignore[reportAssignmentType]
+        "lastClr", ST_HexColorRGB
+    )
+    val: str = RequiredAttribute("val", XsdString)  # pyright: ignore[reportAssignmentType]

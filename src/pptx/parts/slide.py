@@ -100,7 +100,7 @@ class NotesMasterPart(BaseSlidePart):
     @classmethod
     def _new_theme_part(cls, package):
         """Return new default theme-part suitable for use with a notes master."""
-        return XmlPart(
+        return ThemePart(
             package.next_partname("/ppt/theme/theme%d.xml"),
             CT.OFC_THEME,
             package,
@@ -373,3 +373,14 @@ class SlideMasterPart(BaseSlidePart):
         The |SlideMaster| object representing this part.
         """
         return SlideMaster(self._element, self)
+
+    @property
+    def theme_part(self) -> ThemePart:
+        """Return the |ThemePart| related to this slide-master part."""
+        return self.part_related_by(RT.THEME)
+
+
+class ThemePart(XmlPart):
+    """Part for ``/ppt/theme/themeN.xml``."""
+
+    _element: CT_OfficeStyleSheet

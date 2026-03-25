@@ -24,6 +24,7 @@ from pptx.parts.slide import (
     SlideLayoutPart,
     SlideMasterPart,
     SlidePart,
+    ThemePart,
 )
 
 if TYPE_CHECKING:
@@ -52,6 +53,7 @@ content_type_to_part_class_map: dict[str, type[Part]] = {
     CT.OFC_CHART_EX: ChartExPart,
     CT.PML_COMMENTS: SlideCommentsPart,
     CT.PML_COMMENT_AUTHORS: CommentAuthorsPart,
+    CT.OFC_THEME: ThemePart,
     CT.DML_DIAGRAM_DATA: DiagramDataPart,
     CT.BMP: ImagePart,
     CT.GIF: ImagePart,
@@ -90,6 +92,7 @@ del (
     SlidePart,
     SlideLayoutPart,
     SlideMasterPart,
+    ThemePart,
     PresentationPart,
     CT,
     PartFactory,

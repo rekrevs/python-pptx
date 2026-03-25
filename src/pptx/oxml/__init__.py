@@ -500,6 +500,8 @@ register_element_cls("a:buSzTx", CT_TextBulletSizeFollowText)
 register_element_cls("a:defRPr", CT_TextCharacterProperties)
 register_element_cls("a:endParaRPr", CT_TextCharacterProperties)
 register_element_cls("a:fld", CT_TextField)
+register_element_cls("a:cs", CT_TextFont)
+register_element_cls("a:ea", CT_TextFont)
 register_element_cls("a:latin", CT_TextFont)
 register_element_cls("a:lnSpc", CT_TextSpacing)
 register_element_cls("a:normAutofit", CT_TextNormalAutofit)
@@ -517,9 +519,35 @@ register_element_cls("c:txPr", CT_TextBody)
 register_element_cls("p:txBody", CT_TextBody)
 
 
-from pptx.oxml.theme import CT_OfficeStyleSheet  # noqa: E402
+from pptx.oxml.theme import (  # noqa: E402
+    CT_BaseThemeElements,
+    CT_ColorScheme,
+    CT_FontCollection,
+    CT_FontScheme,
+    CT_FormatScheme,
+    CT_OfficeStyleSheet,
+    CT_ThemeColor,
+)
 
 register_element_cls("a:theme", CT_OfficeStyleSheet)
+register_element_cls("a:themeElements", CT_BaseThemeElements)
+register_element_cls("a:clrScheme", CT_ColorScheme)
+register_element_cls("a:fontScheme", CT_FontScheme)
+register_element_cls("a:majorFont", CT_FontCollection)
+register_element_cls("a:minorFont", CT_FontCollection)
+register_element_cls("a:fmtScheme", CT_FormatScheme)
+register_element_cls("a:dk1", CT_ThemeColor)
+register_element_cls("a:lt1", CT_ThemeColor)
+register_element_cls("a:dk2", CT_ThemeColor)
+register_element_cls("a:lt2", CT_ThemeColor)
+register_element_cls("a:accent1", CT_ThemeColor)
+register_element_cls("a:accent2", CT_ThemeColor)
+register_element_cls("a:accent3", CT_ThemeColor)
+register_element_cls("a:accent4", CT_ThemeColor)
+register_element_cls("a:accent5", CT_ThemeColor)
+register_element_cls("a:accent6", CT_ThemeColor)
+register_element_cls("a:hlink", CT_ThemeColor)
+register_element_cls("a:folHlink", CT_ThemeColor)
 
 
 from pptx.oxml.diagram import (  # noqa: E402

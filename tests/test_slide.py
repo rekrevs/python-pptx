@@ -911,6 +911,15 @@ class DescribeSlideMaster(object):
         SlideLayouts_.assert_called_once_with(sldLayoutIdLst, slide_master)
         assert slide_layouts is slide_layouts_
 
+    def it_provides_access_to_its_theme(self):
+        from pptx import Presentation as Prs
+        from pptx.theme import Theme
+
+        prs = Prs()
+        slide_master = prs.slide_masters[0]
+        theme = slide_master.theme
+        assert isinstance(theme, Theme)
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
