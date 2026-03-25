@@ -24,7 +24,7 @@ from pptx.util import lazyproperty
 
 if TYPE_CHECKING:
     from pptx.chart.chart import Chart
-    from pptx.dml.effect import ShadowFormat
+    from pptx.dml.effect import GlowFormat, ReflectionFormat, ShadowFormat, SoftEdgeFormat
     from pptx.oxml.shapes.graphfrm import CT_GraphicalObjectData, CT_GraphicalObjectFrame
     from pptx.parts.chart import ChartPart
     from pptx.parts.diagram import DiagramDataPart
@@ -91,6 +91,24 @@ class GraphicFrame(BaseShape):
         return _OleFormat(self._graphicFrame.graphicData, self._parent)
 
     @lazyproperty
+    def glow(self) -> GlowFormat:
+        """Unconditionally raises |NotImplementedError|.
+
+        Access to the glow effect for graphic-frame objects is content-specific and has not yet
+        been implemented.
+        """
+        raise NotImplementedError("glow property on GraphicFrame not yet supported")
+
+    @lazyproperty
+    def reflection(self) -> ReflectionFormat:
+        """Unconditionally raises |NotImplementedError|.
+
+        Access to the reflection effect for graphic-frame objects is content-specific and has not
+        yet been implemented.
+        """
+        raise NotImplementedError("reflection property on GraphicFrame not yet supported")
+
+    @lazyproperty
     def shadow(self) -> ShadowFormat:
         """Unconditionally raises |NotImplementedError|.
 
@@ -98,6 +116,15 @@ class GraphicFrame(BaseShape):
         for charts, tables, etc.) and has not yet been implemented.
         """
         raise NotImplementedError("shadow property on GraphicFrame not yet supported")
+
+    @lazyproperty
+    def soft_edge(self) -> SoftEdgeFormat:
+        """Unconditionally raises |NotImplementedError|.
+
+        Access to the soft edge effect for graphic-frame objects is content-specific and has not
+        yet been implemented.
+        """
+        raise NotImplementedError("soft_edge property on GraphicFrame not yet supported")
 
     @property
     def has_model_3d(self) -> bool:

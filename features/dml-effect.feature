@@ -1,7 +1,7 @@
-Feature: ShadowFormat
-  In order to adjust a shadow effect
+Feature: Shape effects
+  In order to adjust visual effects on shapes
   As a developer using python-pptx
-  I need properties and methods on ShadowFormat
+  I need properties and methods on effect format objects
 
 
   Scenario Outline: ShadowFormat.inherit getter
@@ -27,3 +27,28 @@ Feature: ShadowFormat
       | inherits         | True      | True  |
       | does not inherit | None      | False |
       | does not inherit | False     | False |
+
+
+  Scenario: ShadowFormat shadow_type getter
+    Given a shape with an outer shadow as shadow_shape
+     Then shadow.shadow_type is "outer"
+
+
+  Scenario: ShadowFormat angle getter
+    Given a shape with an outer shadow as shadow_shape
+     Then shadow.angle is 90.0
+
+
+  Scenario: ShadowFormat blur_radius getter
+    Given a shape with an outer shadow as shadow_shape
+     Then shadow.blur_radius is 40000
+
+
+  Scenario: ShadowFormat distance getter
+    Given a shape with an outer shadow as shadow_shape
+     Then shadow.distance is 23000
+
+
+  Scenario: ShadowFormat color getter
+    Given a shape with an outer shadow as shadow_shape
+     Then shadow.color.rgb is "000000"

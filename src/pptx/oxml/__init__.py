@@ -281,6 +281,23 @@ register_element_cls("a:solidFill", CT_SolidColorFillProperties)
 register_element_cls("a:srcRect", CT_RelativeRect)
 
 
+from pptx.oxml.dml.effect import (  # noqa: E402
+    CT_EffectList,
+    CT_GlowEffect,
+    CT_InnerShadowEffect,
+    CT_OuterShadowEffect,
+    CT_ReflectionEffect,
+    CT_SoftEdgesEffect,
+)
+
+register_element_cls("a:effectLst", CT_EffectList)
+register_element_cls("a:glow", CT_GlowEffect)
+register_element_cls("a:innerShdw", CT_InnerShadowEffect)
+register_element_cls("a:outerShdw", CT_OuterShadowEffect)
+register_element_cls("a:reflection", CT_ReflectionEffect)
+register_element_cls("a:softEdge", CT_SoftEdgesEffect)
+
+
 from pptx.oxml.dml.line import CT_PresetLineDashProperties  # noqa: E402
 
 register_element_cls("a:prstDash", CT_PresetLineDashProperties)
